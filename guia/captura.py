@@ -43,7 +43,7 @@ async def main():
     await pg.click(chip('polo','PROJAD/UFRJ')); await pg.click(chip('frentes','RUAS'))
     await pg.fill('#f_equipe','Carla (exemplo)'); await pg.fill('#f_nome','Paulo Fictício Rocha'); await pg.fill('#f_tel','(21) 90000-0009')
     await pg.evaluate('document.activeElement.blur(); window.scrollTo(0,0)'); await pg.wait_for_timeout(200)
-    await foto(pg,'a_inicio',[(1,'.chips[data-name="polo"]'),(2,'#fFrentes'),(3,'#f_equipe'),(4,'#f_nome'),(5,'#f_tel')], clip={'x':0,'y':0,'width':390,'height':1090})
+    await foto(pg,'a_inicio',[(1,'#f_equipe'),(2,'.chips[data-name="polo"]'),(3,'#fFrentes'),(4,'#f_nome'),(5,'#f_tel')], clip={'x':0,'y':0,'width':390,'height':1090})
     # B: fim do formulário
     await pg.click(chip('encaminhamento','CAPS AD')); await pg.fill('#f_encam_qual','CAPS AD Exemplo'); await pg.click('#thumbPos')
     await pg.evaluate('document.activeElement.blur(); document.querySelector(\'.chips[data-name="encaminhamento"]\').closest(".field").scrollIntoView({block:"start"}); window.scrollBy(0,-70)'); await pg.wait_for_timeout(250)

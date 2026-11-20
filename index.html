@@ -122,6 +122,10 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
   .qbox .qi{font-size:1rem}
 }
 
+/* quem registra: fica acima de Novo/Retorno, porque o retorno lista os atendidos dessa pessoa */
+.equipe-card{padding:2px 16px 14px; margin-bottom:12px}
+.equipe-card .field{margin-top:12px}
+
 /* novo atendido x retorno: dois boxes lado a lado */
 .modo{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px}
 .modo-box{display:flex; align-items:center; gap:10px; text-align:left; min-width:0; min-height:58px; padding:10px 12px; border-radius:var(--radius); border:1.5px solid var(--line); background:#fff; color:var(--ink); box-shadow:var(--shadow); transition:.12s}
@@ -235,6 +239,8 @@ table.ind td.tot{font-weight:700; color:var(--brand-dark)}
   .audio-drop p{font-size:.84rem}
   #audioDrop .btn-sm{min-height:38px}
   .modo{gap:8px; margin-bottom:12px}
+  .equipe-card{padding:0 12px 12px; margin-bottom:10px}
+  .equipe-card .field{margin-top:10px}
   .modo-box{padding:8px 9px; gap:7px; min-height:52px}
   .modo-box .mi{display:none}
   .db-topo input[type=text]{flex:1 1 100%}
@@ -353,6 +359,15 @@ h3.blk{font-family:'Archivo',sans-serif; font-weight:800; font-size:1.05rem; mar
     <a class="qbox b" href="encaminhamentos.html"><span class="qi">🗺️</span>Mapa de encaminhamentos</a>
   </div>
 
+  <div class="card equipe-card">
+    <div class="field">
+      <label class="flabel" for="f_equipe">Seu nome (equipe)</label>
+      <input type="text" id="f_equipe" name="equipe" data-req="1" list="listaEquipe" autocomplete="off" placeholder="Toque para escolher seu nome ou digite">
+      <datalist id="listaEquipe"></datalist>
+      <p class="hint">Escolha seu nome na lista de quem já lançou atendimento. Se for a primeira vez, escreva do seu jeito, que ele passa a aparecer para você da próxima vez.</p>
+    </div>
+  </div>
+
   <div class="modo" id="pbar">
     <button type="button" class="modo-box on" id="btnNovo" onclick="if(state.pessoa) novoAtendido(true)">
       <span class="mi">＋</span><span class="mt"><b>Novo atendido</b><small>Primeiro cadastro</small></span>
@@ -383,12 +398,6 @@ h3.blk{font-family:'Archivo',sans-serif; font-weight:800; font-size:1.05rem; mar
       <div class="field">
         <label class="flabel" for="f_data">Data</label>
         <input type="date" id="f_data" name="data" data-req="1">
-      </div>
-      <div class="field">
-        <label class="flabel" for="f_equipe">Seu nome (equipe)</label>
-        <input type="text" id="f_equipe" name="equipe" data-req="1" list="listaEquipe" autocomplete="off" placeholder="Toque para escolher seu nome ou digite">
-        <datalist id="listaEquipe"></datalist>
-        <p class="hint">Escolha seu nome na lista de quem já lançou atendimento. Se for a primeira vez, escreva do seu jeito, que ele passa a aparecer para você da próxima vez.</p>
       </div>
       <div class="field">
         <label class="flabel" for="f_nome">Nome do entrevistado</label>
