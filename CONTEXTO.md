@@ -79,7 +79,7 @@ A leitura direta da planilha (esquema `migracao` e extensão `http`) foi removid
 - [x] Leitura da planilha desligada em 20/11/2026.
 - [x] Site URL do login configurado e primeiro login de administrador feito em 20/11/2026; edição aprovada e áudio enviado no teste do Romulo.
 - [x] Atendimentos de teste apagados em 20/11/2026 (4 registros com nome "Teste" e 1 sem nome lançado por "Testador"; o banco ficou com 92 atendimentos de 60 pessoas). Falta o Romulo apagar o arquivo de áudio de teste em Storage > audios.
-- [ ] Romulo decidir se as 3 oficinas "Oficina de música" de 22/08 e o encontro intersetorial "Encontro" de 22/08 são teste. Ele decidiu manter os 19 encontros intersetoriais.
+- [x] Romulo decidiu manter as 3 oficinas "Oficina de música" de 22/08, o encontro "Encontro" de 22/08 e os 19 encontros intersetoriais (20/11/2026).
 - [ ] Romulo: restringir o compartilhamento da planilha (está legível por qualquer pessoa com o link).
 - [ ] O envio de e-mail do mapa ainda usa um Apps Script próprio (`EMAIL_URL` em `encaminhamentos.html`), que não depende da planilha.
 - [ ] Preencher os 6 atendimentos sem polo (Romulo disse que são PROJAD/UFRJ).
