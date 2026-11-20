@@ -70,25 +70,15 @@ Iguais às do painel antigo (conferido com os números do Apps Script em 20/11/2
 
 Entraram: 96 atendimentos (63 pessoas), 52 oficinas, 19 encontros intersetoriais (16 da aba INTERSETORIAL e 3 da aba antiga INTERSETORIAIS), 366 pontos da rede, 5 encaminhamentos gerados. Ficaram na planilha: abas `antigo_*`, `base_censo_2024` e `Indicadores`.
 
-O esquema `migracao` do banco tem funções temporárias que leem a planilha direto. Para trazer o que entrou na planilha depois da migração (sem duplicar):
-
-```sql
-select migracao.trazer('atendimentos','789753437', array['registro_em','id_pessoa']),
-       migracao.trazer('oficinas','1234200967', array['registro_em']),
-       migracao.trazer('intersetoriais','446406567', array['registro_em']),
-       migracao.trazer('encaminhamentos_doc','806566102', array['registro_em']);
-```
-
-Depois da virada do site, apagar: `drop schema migracao cascade; drop extension http;`. Essas funções só funcionam enquanto a planilha estiver compartilhada por link.
+A leitura direta da planilha (esquema `migracao` e extensão `http`) foi removida do banco em 20/11/2026, depois de conferir que nada novo tinha entrado na planilha após a publicação do site. Se aparecer registro na planilha depois dessa data (alguém com o site antigo aberto), é preciso trazer à mão.
 
 ## Pendências
 
 - [x] Netlify ligado ao repositório em 20/11/2026; o site novo está no ar e lendo o banco (conferido nos registros de acesso do Supabase).
-- [ ] Claude: rodar `migracao.trazer` (acima) uma última vez depois dos testes do Romulo e apagar o esquema `migracao`. Em 20/11, logo após a publicação, não havia nada novo na planilha. Quem estiver com o site antigo aberto no celular ainda grava na planilha até recarregar a página.
-- [ ] Romulo: no Supabase, Authentication > URL Configuration, pôr `https://caispesquisa.netlify.app` como Site URL (sem isso o link de login abre uma página que não existe; o plano B de colar o link funciona).
-- [ ] Romulo: primeiro login como administrador e teste de aprovação.
+- [x] Leitura da planilha desligada em 20/11/2026.
+- [x] Site URL do login configurado e primeiro login de administrador feito em 20/11/2026; edição aprovada e áudio enviado no teste do Romulo.
+- [ ] Apagar o atendimento "Teste" (id 99) e a gravação dele, se o Romulo confirmar.
 - [ ] Romulo: restringir o compartilhamento da planilha (está legível por qualquer pessoa com o link).
-- [ ] Testar no celular real: gravação e envio de áudio, fila offline, tempo real.
 - [ ] O envio de e-mail do mapa ainda usa um Apps Script próprio (`EMAIL_URL` em `encaminhamentos.html`), que não depende da planilha.
 - [ ] Preencher os 6 atendimentos sem polo (Romulo disse que são PROJAD/UFRJ).
 
