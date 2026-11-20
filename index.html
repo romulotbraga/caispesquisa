@@ -215,9 +215,12 @@ table.db th:first-child{z-index:4}
 td.c-nome{background:#fff; z-index:1; font-weight:700; max-width:230px; border-right:1px solid var(--line)}
 td.c-ed, table.db th:last-child{position:sticky; right:0; text-align:center; overflow:visible; padding-left:6px; padding-right:6px}
 td.c-ed{background:#fff; z-index:1; border-left:1px solid var(--line)}
-.seta{display:inline-block; width:14px; color:var(--muted); transition:transform .15s}
+.nm-l{display:flex; align-items:center; min-width:0}
+.nm-l .nm{overflow:hidden; text-overflow:ellipsis; min-width:0}
+.nm-l .wa, .nm-l .pend, .nm-l .seta{flex:none}
+.seta{display:inline-block; width:14px; color:var(--muted); transition:transform .15s; text-align:center}
 tr.aberta .seta{transform:rotate(90deg)}
-.wa{display:inline-flex; width:18px; height:18px; border-radius:50%; background:#25D366; align-items:center; justify-content:center; vertical-align:-4px; margin-left:6px}
+.wa{display:inline-flex; width:18px; height:18px; border-radius:50%; background:#25D366; align-items:center; justify-content:center; margin-left:6px}
 .wa svg{width:11px; height:11px; fill:#fff}
 .nn{display:inline-block; min-width:22px; text-align:center; background:var(--brand-soft); color:var(--brand-dark); border-radius:999px; padding:1px 7px; font-weight:700; font-family:'IBM Plex Mono',monospace; font-size:.72rem}
 tr.aberta .nn{background:#fff}
@@ -1751,7 +1754,7 @@ function renderBanco(){
     const c = p.campos, u = p.ultimo, aberta = abertas.has(p.id_pessoa);
     const nPend = p.atendimentos.reduce((s,a)=>s + (pendDe[a.id]||0), 0);
     let h = `<tr class="pl${aberta?' aberta':''}" data-p="${escapar(p.id_pessoa)}">
-      <td class="c-nome" title="${escapar(p.nome)}"><span class="seta">▸</span>${escapar(p.nome || '(sem nome)')}${bolinhaWa(p.telefone)}${nPend?`<span class="pend">${nPend} pendente${nPend>1?'s':''}</span>`:''}</td>
+      <td class="c-nome" title="${escapar(p.nome)}"><div class="nm-l"><span class="seta">▸</span><span class="nm">${escapar(p.nome || '(sem nome)')}</span>${bolinhaWa(p.telefone)}${nPend?`<span class="pend">${nPend} pendente${nPend>1?'s':''}</span>`:''}</div></td>
       <td><span class="nn">${p.n}</span></td>
       ${cel(dataBR(p.ultima_data))}${cel(c.polo)}${cel(c.faixa_etaria)}${cel(c.genero==='Outros' && c.genero_outro ? c.genero_outro : c.genero)}${cel(c.raca_cor)}
       ${cel(c.moradia)}${cel(c.bairro)}${cel(c.substancias)}${cel(c.documentacao)}${cel(p.doc_numero)}${cel(p.telefone)}

@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>CAIS · Guia rápido do site de coleta</title>
+<link rel="stylesheet" href="fontes.css">
+<style>
+@page{size:A4; margin:0}
+:root{--ink:#10312C; --muted:#5B7069; --brand:#0E7C66; --dark:#0A5A4B; --soft:#E3F0EC; --amber:#E8A83B; --amber-soft:#FBF1DC; --line:#DCE6E1; --seta:#D9480F}
+*{box-sizing:border-box; margin:0; padding:0}
+body{font-family:'Instrument Sans',sans-serif; color:var(--ink); font-size:12.5px; line-height:1.5; -webkit-print-color-adjust:exact; print-color-adjust:exact}
+.pg{width:210mm; height:297mm; padding:0 15mm 12mm; position:relative; page-break-after:always; overflow:hidden}
+.pg:last-child{page-break-after:auto}
+.faixa{background:var(--dark); color:#fff; margin:0 -15mm 9mm; padding:6mm 15mm 5mm; display:flex; align-items:baseline; gap:10px; border-bottom:4px solid var(--amber)}
+.faixa b{font-family:'Archivo',sans-serif; font-weight:900; font-size:17px; letter-spacing:.02em}
+.faixa span{font-size:9px; letter-spacing:.14em; text-transform:uppercase; opacity:.8; font-weight:600}
+.faixa i{margin-left:auto; font-style:normal; font-family:'IBM Plex Mono',monospace; font-size:9px; opacity:.8}
+h1{font-family:'Archivo',sans-serif; font-weight:900; font-size:30px; line-height:1.12; margin-bottom:6px}
+h2{font-family:'Archivo',sans-serif; font-weight:800; font-size:19px; margin-bottom:3px}
+h2 .num{display:inline-block; background:var(--dark); color:#fff; border-radius:7px; padding:0 8px; margin-right:8px}
+h3{font-family:'Archivo',sans-serif; font-weight:800; font-size:13.5px; margin:0 0 4px}
+.lead{color:var(--muted); font-size:13px; margin-bottom:12px; max-width:150mm}
+.cols{display:grid; gap:9mm; align-items:start}
+.c2{grid-template-columns:1fr 1fr}
+.cfig{grid-template-columns:auto 1fr}
+ol.passos{list-style:none; counter-reset:p; display:grid; gap:8px}
+ol.passos li{counter-increment:p; position:relative; padding-left:30px}
+ol.passos li::before{content:counter(p); position:absolute; left:0; top:0; width:21px; height:21px; border-radius:50%; background:var(--seta); color:#fff; font-family:'Archivo',sans-serif; font-weight:800; font-size:11.5px; display:flex; align-items:center; justify-content:center}
+ol.passos li b{font-weight:700}
+.caixa{background:var(--soft); border:1px solid #B9D8CE; border-radius:10px; padding:10px 13px}
+.caixa.am{background:var(--amber-soft); border-color:#EED9AC}
+.caixa ul{margin:4px 0 0 16px; display:grid; gap:3px}
+.mt{margin-top:12px}
+.url{font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:15px; color:var(--dark); background:var(--soft); border-radius:8px; padding:6px 12px; display:inline-block; margin:8px 0 14px}
+/* figuras */
+.fig{position:relative; flex:none}
+.fig img{display:block; border:1px solid var(--line); border-radius:10px; box-shadow:0 2px 10px rgba(16,49,44,.12)}
+.fig .alvo{position:absolute; border:2px solid var(--seta); border-radius:7px; box-shadow:0 0 0 2px rgba(255,255,255,.75)}
+.fig svg{position:absolute; left:0; top:0; overflow:visible; pointer-events:none}
+
+.fig .bola:empty{width:13px; height:13px; margin:4px}
+.fig .bola{position:absolute; width:21px; height:21px; border-radius:50%; background:var(--seta); color:#fff; font-family:'Archivo',sans-serif; font-weight:800; font-size:11.5px; display:flex; align-items:center; justify-content:center; box-shadow:0 0 0 2px #fff}
+.leg{font-size:10.5px; color:var(--muted); margin-top:5px}
+.rod{position:absolute; left:15mm; right:15mm; bottom:7mm; display:flex; justify-content:space-between; font-family:'IBM Plex Mono',monospace; font-size:8.5px; color:var(--muted); border-top:1px solid var(--line); padding-top:5px}
+</style>
+</head>
+<body>
+
+<!-- 1 -->
+<section class="pg">
+  <div class="faixa"><b>CAIS</b><span>Guia rápido do site de coleta</span><i>novembro de 2026</i></div>
+  <h1>Como usar o site<br>de coleta do CAIS</h1>
+  <p class="lead">Para quem vai usar pela primeira vez. Em poucos minutos você aprende a registrar um atendimento, um retorno e uma atividade, e a consultar o que já foi lançado.</p>
+  <div class="url">caispesquisa.netlify.app</div>
+  <div class="cols cfig">
+    <div class="fig" data-fig="z_topo" data-w="300" data-modo="pino" data-pos='{"4":[-175,0]}' style="margin-left:26px"></div>
+    <div>
+      <h3>O que você encontra ao abrir</h3>
+      <ol class="passos">
+        <li><b>Coleta.</b> Onde você registra cada atendimento. É a tela que abre primeiro.</li>
+        <li><b>Banco de dados.</b> Todas as pessoas atendidas, numa tabela só.</li>
+        <li><b>Painel.</b> Os números do projeto, atualizados sozinhos.</li>
+        <li><b>Atalhos.</b> Lançar uma oficina, lançar um encontro intersetorial e abrir o mapa de encaminhamentos.</li>
+      </ol>
+    </div>
+  </div>
+  <div class="cols c2 mt" style="margin-top:22px">
+    <div class="caixa">
+      <h3>Antes de começar</h3>
+      <ul>
+        <li>O site abre no navegador do celular ou do computador, sem senha.</li>
+        <li>Nenhum campo é obrigatório. Preencha o que souber.</li>
+        <li>O que você registra aparece para toda a equipe na hora.</li>
+        <li>Para marcar uma opção, toque nela. Tocar de novo desmarca.</li>
+      </ul>
+    </div>
+    <div class="caixa am">
+      <h3>Cuidado com os dados</h3>
+      <ul>
+        <li>O site guarda nome, documento, telefone e saúde de pessoas atendidas. Não compartilhe prints nem o endereço fora da equipe.</li>
+        <li>Os nomes e números que aparecem neste guia são inventados.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="caixa mt">
+    <h3>Dica: deixe o site na tela inicial do celular</h3>
+    No navegador, abra o menu e escolha "Adicionar à tela inicial". O CAIS passa a abrir como um aplicativo.
+  </div>
+  <div class="rod"><span>CAIS · Guia rápido</span><span>1</span></div>
+</section>
+
+<!-- 2 -->
+<section class="pg">
+  <div class="faixa"><b>CAIS</b><span>Guia rápido do site de coleta</span><i>aba Coleta</i></div>
+  <h2><span class="num">1</span>Registrar um atendimento novo</h2>
+  <p class="lead">Use quando a pessoa está sendo atendida pela primeira vez. O formulário é uma tela só: vá preenchendo de cima para baixo.</p>
+  <div class="cols c2">
+    <div>
+      <div class="fig" data-fig="a_inicio" data-w="205"></div>
+      <ol class="passos mt">
+        <li><b>Polo.</b> Toque em Espaço Normal ou PROJAD/UFRJ.</li>
+        <li><b>Frente do PROJAD.</b> Só aparece no PROJAD. Marque RUAS, Capoeira ou CnaR, se souber.</li>
+        <li><b>Seu nome.</b> Escolha na lista. O site lembra da próxima vez.</li>
+        <li><b>Nome da pessoa atendida.</b> Completo ou como ela prefere ser chamada.</li>
+        <li><b>Telefone.</b> Quando houver. Serve para a equipe falar com a pessoa pelo WhatsApp.</li>
+      </ol>
+    </div>
+    <div>
+      <div class="fig" data-fig="b_fim" data-w="205" data-offset="5"></div>
+      <ol class="passos mt" style="counter-reset:p 5">
+        <li><b>Encaminhamento.</b> Marque para onde a pessoa foi encaminhada e escreva o serviço exato. Se não houve, marque "Não houve".</li>
+        <li><b>Avaliação.</b> Toque no polegar que a pessoa escolher.</li>
+        <li><b>Gravação.</b> Grave a entrevista ou anexe um arquivo. O consentimento deve estar dito na gravação. Deixe a tela ligada.</li>
+        <li><b>Registrar atendimento.</b> Aparece o aviso "Atendimento registrado".</li>
+      </ol>
+    </div>
+  </div>
+  <div class="caixa mt">Entre o telefone e o encaminhamento ficam as perguntas sobre a pessoa: idade, gênero, raça/cor, moradia, bairro, substâncias, vínculos com a rede, documentação e demanda. O contador ao lado do botão mostra quantos campos você já preencheu.</div>
+  <div class="rod"><span>CAIS · Guia rápido</span><span>2</span></div>
+</section>
+
+<!-- 3 -->
+<section class="pg">
+  <div class="faixa"><b>CAIS</b><span>Guia rápido do site de coleta</span><i>aba Coleta</i></div>
+  <h2><span class="num">2</span>Quando a pessoa volta: retorno</h2>
+  <p class="lead">Não cadastre de novo quem já foi atendido. No retorno, os dados da pessoa vêm preenchidos e você só atualiza o que mudou.</p>
+  <div class="cols cfig">
+    <div class="fig" data-fig="c_retorno" data-w="235"></div>
+    <div>
+      <p style="margin-bottom:8px">Preencha <b>Seu nome</b> e toque em <b>Retorno de atendido</b>, no alto da Coleta. Abre esta lista:</p>
+      <ol class="passos">
+        <li><b>Busque</b> pelo nome ou pelo número do documento.</li>
+        <li><b>Toque na pessoa.</b> O número à direita mostra quantos atendimentos ela já tem.</li>
+        <li><b>Não achou?</b> Marque esta caixa para ver quem foi cadastrado por outra pessoa da equipe.</li>
+      </ol>
+      <div class="cols c2 mt" style="gap:6mm; margin-top:18px">
+        <div>
+          <div class="fig" data-fig="d_barra" data-w="180" data-modo="pino" data-semnum="1"></div>
+          <p class="leg">A barra verde confirma que é um retorno e de quem. Confira os dados, corrija o que mudou e registre.</p>
+        </div>
+        <div>
+          <div class="fig" data-fig="e_anterior" data-w="180"></div>
+          <p class="leg">Esta pergunta só aparece no retorno.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="caixa am mt">
+    <h3>A pergunta mais importante do retorno</h3>
+    "A pessoa chegou ao serviço para onde foi encaminhada?" Marque <b>Sim, chegou ao serviço</b> quando ela conseguiu ser atendida lá. É essa resposta que o painel conta como encaminhamento efetivado.
+  </div>
+  <div class="rod"><span>CAIS · Guia rápido</span><span>3</span></div>
+</section>
+
+<!-- 4 -->
+<section class="pg">
+  <div class="faixa"><b>CAIS</b><span>Guia rápido do site de coleta</span><i>aba Coleta</i></div>
+  <h2><span class="num">3</span>Lançar oficina ou encontro intersetorial</h2>
+  <p class="lead">Atividades coletivas e reuniões com outros serviços têm um registro rápido, pelos atalhos amarelos do alto da tela.</p>
+  <div class="cols cfig">
+    <div class="fig" data-fig="f_oficina" data-w="225"></div>
+    <div>
+      <ol class="passos">
+        <li><b>Polo</b> onde a atividade aconteceu.</li>
+        <li><b>Nome da atividade.</b> Use sempre o mesmo nome para a mesma atividade.</li>
+        <li><b>Número de pessoas presentes.</b> Só o número.</li>
+        <li><b>Lançar.</b> Toque uma vez só e espere o aviso.</li>
+      </ol>
+      <div class="caixa am mt"><b>Toque uma vez.</b> Cada toque em Lançar cria um registro. Dois toques contam a atividade em dobro no painel.</div>
+      <p class="mt">O <b>encontro intersetorial</b> funciona do mesmo jeito: polo, data, setores envolvidos (saúde, SUAS, justiça, educação), número de presentes e a pauta.</p>
+
+      <h2 style="margin-top:26px"><span class="num">4</span>Sem internet</h2>
+      <p style="color:var(--muted); margin-bottom:10px">Pode registrar normalmente. Nada se perde.</p>
+      <div class="fig" data-fig="j_fila" data-w="270" data-modo="pino"></div>
+      <ol class="passos mt">
+        <li><b>Na fila.</b> O registro fica guardado no aparelho. Quando a internet voltar, ele sobe sozinho; se não subir, toque aqui.</li>
+      </ol>
+      <p class="leg">Com registro na fila, não limpe os dados do navegador nem troque de aparelho.</p>
+    </div>
+  </div>
+  <div class="rod"><span>CAIS · Guia rápido</span><span>4</span></div>
+</section>
+
+<!-- 5 -->
+<section class="pg">
+  <div class="faixa"><b>CAIS</b><span>Guia rápido do site de coleta</span><i>aba Banco de dados</i></div>
+  <h2><span class="num">5</span>Consultar quem já foi atendido</h2>
+  <p class="lead">Cada linha é uma pessoa, com os dados do atendimento mais recente. A tabela se atualiza sozinha quando alguém da equipe registra algo.</p>
+  <div class="fig" data-fig="g_banco" data-w="616" data-modo="pino" data-pos='{"1":["esq",0],"2":["esq",0],"3":[30,-26],"4":["dir",0],"5":["esq",0]}' style="margin:0 34px"></div>
+  <div class="cols c2 mt" style="margin-top:16px">
+    <ol class="passos">
+      <li><b>Busca.</b> Por nome, bairro, documento ou telefone.</li>
+      <li><b>Toque na linha</b> para abrir os atendimentos da pessoa. Toque de novo para fechar.</li>
+      <li><b>Bolinha verde.</b> Aparece quando há telefone e abre a conversa com a pessoa no WhatsApp.</li>
+    </ol>
+    <ol class="passos" style="counter-reset:p 3">
+      <li><b>Lápis.</b> Abre a ficha completa do atendimento, para ver tudo ou corrigir.</li>
+      <li><b>Atendimentos da pessoa,</b> do mais recente para o mais antigo, com demanda, encaminhamento e avaliação.</li>
+    </ol>
+  </div>
+  <div class="caixa mt">No celular a tabela é mais larga que a tela: arraste para o lado para ver as outras colunas. O nome e o lápis ficam sempre visíveis.</div>
+  <div class="rod"><span>CAIS · Guia rápido</span><span>5</span></div>
+</section>
+
+<!-- 6 -->
+<section class="pg">
+  <div class="faixa"><b>CAIS</b><span>Guia rápido do site de coleta</span><i>abas Banco de dados e Painel</i></div>
+  <h2><span class="num">6</span>Corrigir um dado</h2>
+  <p class="lead">Errou alguma coisa? Você propõe a correção e o administrador aprova. Até lá, vale o dado antigo.</p>
+  <div class="cols" style="grid-template-columns:auto auto 1fr">
+    <div class="fig" data-fig="h_editar" data-w="178"></div>
+    <div>
+      <div class="fig" data-fig="h_enviar" data-w="178" data-offset="1"></div>
+      <div class="fig" data-fig="i_pendente" data-w="178" style="margin-top:14px"></div>
+      <p class="leg" style="max-width:178px">A caixa amarela mostra o que está aguardando aprovação.</p>
+    </div>
+    <div>
+      <p style="margin-bottom:8px">No Banco de dados, toque no <b>lápis</b> do atendimento.</p>
+      <ol class="passos">
+        <li><b>Mude o campo errado.</b> A ficha mostra todos os campos do atendimento.</li>
+        <li><b>Escreva seu nome,</b> para ficar registrado quem propôs.</li>
+        <li><b>Enviar para aprovação.</b></li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="cols cfig" style="margin-top:20px">
+    <div class="fig" data-fig="k_painel" data-w="178"></div>
+    <div>
+      <h2><span class="num">7</span>Acompanhar os números</h2>
+      <p style="color:var(--muted); margin-bottom:10px">A aba Painel soma o que a equipe registrou e compara os dois polos.</p>
+      <ol class="passos">
+        <li><b>Atualizar.</b> O painel já se atualiza sozinho; o botão força uma nova leitura.</li>
+        <li><b>Números principais:</b> atendimentos, pessoas atendidas, encaminhamentos que deram certo e avaliações positivas.</li>
+      </ol>
+      <div class="caixa mt">
+        <h3>Ficou com dúvida ou algo não funcionou?</h3>
+        Fale com o Romulo, que administra o site. Se puder, mande um print da tela.
+      </div>
+    </div>
+  </div>
+  <div class="rod"><span>CAIS · Guia rápido</span><span>6</span></div>
+</section>
+
+<script>
+fetch('fig.json').then(r=>r.json()).then(FIG=>{
+  document.querySelectorAll('.fig').forEach(el=>{
+    const f = FIG[el.dataset.fig], W = +el.dataset.w, k = W / f.w, H = f.h * k, pino = el.dataset.modo === 'pino';
+    const SV = 'http://www.w3.org/2000/svg';
+    el.style.width = (pino ? W : W + 40) + 'px';
+    el.style.height = H + 'px';
+    const img = new Image(); img.src = el.dataset.fig + '.png'; img.width = W; img.height = H; el.appendChild(img);
+    const svg = document.createElementNS(SV, 'svg'); svg.setAttribute('width', W + 40); svg.setAttribute('height', H);
+    svg.innerHTML = '<defs><marker id="m_' + el.dataset.fig + '" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#D9480F"/></marker></defs>';
+    el.appendChild(svg);
+    let ultimoY = -99;
+    f.alvos.slice().sort((a, b) => a.y - b.y).forEach(a=>{
+      const x = Math.max(2, a.x * k - 3), y = Math.max(2, a.y * k - 3), w = Math.min(W - x - 2, a.w * k + 6), h = Math.min(H - y - 2, a.h * k + 6);
+      const cx = document.createElement('div'); cx.className = 'alvo'; cx.style.cssText = `left:${x}px;top:${y}px;width:${w}px;height:${h}px`; el.appendChild(cx);
+      const b = document.createElement('div'); b.className = 'bola'; b.textContent = a.n + (+el.dataset.offset || 0); if(el.dataset.semnum) b.textContent = '';
+      const ln = document.createElementNS(SV, 'line'); ln.setAttribute('stroke', '#D9480F'); ln.setAttribute('stroke-width', '2'); ln.setAttribute('marker-end', 'url(#m_' + el.dataset.fig + ')');
+      if(pino){
+        // bolinha perto do alvo (ou na margem), com uma seta curta até a borda dele
+        const pos = (JSON.parse(el.dataset.pos || '{}'))[a.n];
+        let bcx, bcy;                                   // centro da bolinha
+        if(!pos){ bcx = Math.max(10.5, x + 4); bcy = Math.max(10.5, y - 17); }
+        else if(pos[0] === 'esq'){ bcx = -20; bcy = y + h / 2 + pos[1]; }
+        else if(pos[0] === 'dir'){ bcx = W + 20; bcy = y + h / 2 + pos[1]; }
+        else { bcx = x + w / 2 + pos[0]; bcy = y + h / 2 + pos[1]; }
+        b.style.cssText = `left:${bcx - 10.5}px;top:${bcy - 10.5}px`;
+        const px = Math.min(Math.max(bcx, x), x + w), py = Math.min(Math.max(bcy, y), y + h);   // ponto mais próximo no alvo
+        const d = Math.hypot(px - bcx, py - bcy) || 1;
+        ln.setAttribute('x1', bcx + (px - bcx) / d * 11); ln.setAttribute('y1', bcy + (py - bcy) / d * 11); ln.setAttribute('x2', px); ln.setAttribute('y2', py);
+        if(d < 16) ln.style.display = 'none';
+      } else {
+        // bolinha na margem direita, com a seta apontando para o alvo
+        let by = Math.max(y + h / 2 - 10.5, ultimoY + 25); by = Math.min(by, H - 21); ultimoY = by;
+        b.style.cssText = `left:${W + 17}px;top:${by}px`;
+        ln.setAttribute('x1', W + 16); ln.setAttribute('y1', by + 10.5); ln.setAttribute('x2', x + w + 2); ln.setAttribute('y2', Math.min(Math.max(by + 10.5, y + 4), y + h - 4));
+      }
+      svg.appendChild(ln); el.appendChild(b);
+    });
+  });
+  document.body.dataset.pronto = '1';
+});
+</script>
+</body>
+</html>

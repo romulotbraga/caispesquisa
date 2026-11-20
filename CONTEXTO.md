@@ -30,6 +30,7 @@ Site de coleta de campo da pesquisa de implementação do CAIS (Rio de Janeiro),
 - `encaminhamentos.html`: mapa de encaminhamentos (pontos da rede, atendidos, geração de PDF de encaminhamento). `apiGet`/`apiPost` mantêm o formato antigo do Apps Script, mas leem e gravam no Supabase.
 - `cais-db.js`: cliente do Supabase, leitura paginada, inserção, agrupamento por pessoa (`pessoasDe`), telefone para WhatsApp (`foneWa`), login do administrador.
 - `supabase/001_inicial.sql`: tabelas, gatilho, função de aprovação, regras de acesso, tempo real e pasta de áudios.
+- `guia/`: guia rápido em PDF para quem nunca usou o site (`CAIS_guia_rapido.pdf`, 6 páginas, prints com dados fictícios e setas). Para refazer depois de mudar a tela: `captura.py` tira os prints do site local com o banco simulado de `mock.js` (precisa das fontes `@fontsource/archivo`, `instrument-sans` e `ibm-plex-mono` instaladas por npm na mesma pasta) e `pdf.py` gera o PDF a partir de `guia.html`. Os caminhos dentro dos scripts apontam para `/home/claude/...` e precisam ser ajustados.
 - `.github/workflows/manter-ativo.yml`: leitura diária no banco para o projeto free não pausar.
 
 ## Banco
@@ -77,13 +78,14 @@ A leitura direta da planilha (esquema `migracao` e extensão `http`) foi removid
 - [x] Netlify ligado ao repositório em 20/11/2026; o site novo está no ar e lendo o banco (conferido nos registros de acesso do Supabase).
 - [x] Leitura da planilha desligada em 20/11/2026.
 - [x] Site URL do login configurado e primeiro login de administrador feito em 20/11/2026; edição aprovada e áudio enviado no teste do Romulo.
-- [x] Atendimentos de teste apagados em 20/11/2026 (4 registros com nome "Teste"; o banco ficou com 93 atendimentos). Falta o Romulo apagar o arquivo de áudio de teste em Storage > audios.
-- [ ] Romulo decidir se o atendimento sem nome lançado por "Testador" em 20/10 e as 3 oficinas "Oficina de música" de 22/08 são teste.
+- [x] Atendimentos de teste apagados em 20/11/2026 (4 registros com nome "Teste" e 1 sem nome lançado por "Testador"; o banco ficou com 92 atendimentos de 60 pessoas). Falta o Romulo apagar o arquivo de áudio de teste em Storage > audios.
+- [ ] Romulo decidir se as 3 oficinas "Oficina de música" de 22/08 e o encontro intersetorial "Encontro" de 22/08 são teste. Ele decidiu manter os 19 encontros intersetoriais.
 - [ ] Romulo: restringir o compartilhamento da planilha (está legível por qualquer pessoa com o link).
 - [ ] O envio de e-mail do mapa ainda usa um Apps Script próprio (`EMAIL_URL` em `encaminhamentos.html`), que não depende da planilha.
 - [ ] Preencher os 6 atendimentos sem polo (Romulo disse que são PROJAD/UFRJ).
 
 ## Histórico
 
+- 2026-11-20: guia rápido em PDF (pasta `guia/`). No planilhão, a bolinha do WhatsApp deixou de ser cortada em nomes longos.
 - 2026-11-20: site novo publicado pelo Netlify a partir do repositório. A fila offline aceita registros deixados pelo site antigo no aparelho (tira o apóstrofo do documento e cria o `client_id`).
 - 2026-11-20: migração da planilha para o Supabase; site passa a ler e gravar no banco; aba Banco de dados (planilhão em tempo real, edição com aprovação, WhatsApp); campo telefone; frentes do PROJAD; três atalhos em boxes no topo.
