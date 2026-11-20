@@ -65,7 +65,7 @@ Iguais às do painel antigo (conferido com os números do Apps Script em 20/11/2
 - Abaixo de 600 px: título só "CAIS · Coleta de campo", opções (chips) esticam para preencher a linha, exceto a última linha; faixa etária em 5 colunas; campos e espaçamentos menores.
 - "Seu nome (equipe)" fica num cartão próprio acima dos boxes Novo/Retorno, fora do `formAtend` (o retorno lista os atendidos de quem está registrando; o nome continua preenchido depois de cada envio).
 - No topo, dois boxes lado a lado: Novo atendido e Retorno de atendido (`#btnNovo`, `#btnRetorno`, dentro de `#pbar`). O ativo fica verde; no retorno, o box mostra o nome e o número do atendimento.
-- Romulo pediu para tirar as frases de ajuda do telefone, das substâncias, do CPF/RG, do encaminhamento, da avaliação e da gravação (consentimento). Não recolocar.
+- Romulo pediu para tirar as frases de ajuda do Seu nome (equipe), do telefone, das substâncias, do CPF/RG, do encaminhamento, da avaliação e da gravação (consentimento). Não recolocar.
 
 ## Planilhão (aba Banco de dados)
 
