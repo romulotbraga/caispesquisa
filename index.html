@@ -50,6 +50,11 @@ input[type=text],input[type=tel],input[type=email],input[type=date],textarea{wid
 input:focus,textarea:focus{border-color:var(--brand)}
 textarea{min-height:88px; resize:vertical}
 
+/* o campo de data do celular tem largura mínima própria e vazava do cartão */
+input[type=date]{-webkit-appearance:none; appearance:none; display:block; min-width:0; max-width:100%; min-height:46px; text-align:left}
+input[type=date]::-webkit-date-and-time-value{text-align:left}
+.card{min-width:0}
+
 /* subcampo condicional */
 .sub-field{margin-top:10px; padding-left:12px; border-left:3px solid var(--brand-soft)}
 .sub-field .slabel{display:block; font-weight:700; font-size:.82rem; color:var(--brand-dark); margin-bottom:6px}
@@ -117,13 +122,17 @@ textarea{min-height:88px; resize:vertical}
   .qbox .qi{font-size:1rem}
 }
 
-/* barra da pessoa em atendimento */
-.pbar{display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; padding:12px 14px; margin-bottom:14px; border-radius:var(--radius); border:1px solid var(--line); background:#fff; box-shadow:var(--shadow)}
-.pbar.retorno{background:var(--brand-soft); border-color:var(--brand)}
-.pb-tit{font-family:'Archivo',sans-serif; font-weight:800; font-size:.95rem}
-.pb-sub{font-family:'IBM Plex Mono',monospace; font-size:.74rem; color:var(--muted); margin-top:2px}
-.pbar.retorno .pb-sub{color:var(--brand-dark)}
-.pb-acoes{display:flex; gap:8px; flex-wrap:wrap}
+/* novo atendido x retorno: dois boxes lado a lado */
+.modo{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px}
+.modo-box{display:flex; align-items:center; gap:10px; text-align:left; min-width:0; min-height:58px; padding:10px 12px; border-radius:var(--radius); border:1.5px solid var(--line); background:#fff; color:var(--ink); box-shadow:var(--shadow); transition:.12s}
+.modo-box:active{transform:scale(.98)}
+.modo-box .mi{flex:none; width:30px; height:30px; border-radius:50%; background:var(--brand-soft); color:var(--brand-dark); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1rem}
+.modo-box .mt{display:flex; flex-direction:column; min-width:0}
+.modo-box b{font-family:'Archivo',sans-serif; font-weight:800; font-size:.92rem; line-height:1.2; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.modo-box small{font-family:'IBM Plex Mono',monospace; font-size:.68rem; color:var(--muted); margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.modo-box.on{background:var(--brand); border-color:var(--brand); color:#fff}
+.modo-box.on .mi{background:rgba(255,255,255,.2); color:#fff}
+.modo-box.on small{color:rgba(255,255,255,.82)}
 
 /* lista de atendidos */
 .lista-p{max-height:46vh; overflow-y:auto; border:1px solid var(--line); border-radius:12px; margin-top:10px}
@@ -197,6 +206,43 @@ table.ind td.tot{font-weight:700; color:var(--brand-dark)}
 .spark-card h4{font-family:'Archivo',sans-serif; font-weight:800; font-size:.95rem; margin-bottom:10px}
 .hidden{display:none !important}
 
+/* ---------- celular: formulário mais compacto ---------- */
+@media(max-width:600px){
+  .brand .so-largo{display:none}
+  .brand h1{font-size:1.3rem}
+  header.top{padding-bottom:10px}
+  main{padding:14px 12px}
+  .field{margin-top:14px}
+  .field > label.flabel{margin-bottom:6px; font-size:.88rem}
+  .hint{margin-top:4px}
+  input[type=text],input[type=tel],input[type=email],input[type=date],textarea{padding:10px 12px}
+  textarea{min-height:72px}
+  /* opções ocupam a linha inteira, sem sobra no fim */
+  .chips{gap:6px}
+  .chip{flex:1 1 auto; padding:7px 10px; font-size:.84rem; min-height:38px; text-align:center}
+  /* a última linha não estica: um chip sozinho fica do tamanho dele */
+  .chips::after{content:''; flex:1000 1 0; min-width:0}
+  .chips[data-name="faixa_etaria"]{display:grid; grid-template-columns:repeat(5,1fr)}
+  .chips[data-name="faixa_etaria"]::after{display:none}
+  .chips[data-name="faixa_etaria"] .chip{padding:7px 2px}
+  .chip.on::before{content:"✓"; margin-right:3px}
+  .sub-field{margin-top:8px}
+  .pair{gap:10px}
+  .pair-box{padding:10px 11px 12px}
+  .thumb{min-height:56px; padding:9px 10px; flex-direction:row; gap:8px; font-size:.9rem}
+  .thumb .ico{font-size:1.45rem}
+  .audio-drop{padding:14px 12px}
+  .audio-drop p{font-size:.84rem}
+  #audioDrop .btn-sm{min-height:38px}
+  .modo{gap:8px; margin-bottom:12px}
+  .modo-box{padding:8px 9px; gap:7px; min-height:52px}
+  .modo-box .mi{display:none}
+  .db-topo input[type=text]{flex:1 1 100%}
+  .db-topo .btn{flex:1}
+  .modo-box b{font-size:.84rem; white-space:normal}
+  .modo-box small{font-size:.6rem}
+}
+
 /* ---------- banco de dados (planilhão) ---------- */
 main.largo{max-width:1560px}
 .db-topo{display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:8px}
@@ -233,6 +279,35 @@ table.sub{border-collapse:collapse; font-size:.74rem; white-space:nowrap; backgr
 table.sub th{position:static; background:#EAF2EE; color:var(--brand-dark); padding:6px 8px; font-size:.66rem; text-transform:uppercase; letter-spacing:.05em}
 table.sub td{padding:6px 8px; border-top:1px solid var(--line); max-width:230px; overflow:hidden; text-overflow:ellipsis; background:#fff !important; vertical-align:top}
 table.sub td.longo{white-space:normal; min-width:260px; max-width:440px; overflow:visible}
+th.thc{cursor:pointer; user-select:none}
+th.thc:hover{background:#0E6B58}
+th.thc.f, th.thc.o{background:#0E7C66}
+.thl{display:inline-flex; align-items:center; gap:4px}
+.ti{font-size:.62rem; opacity:.7}
+th.o .ti{opacity:1; font-size:.8rem; color:var(--amber)}
+.thl svg{width:11px; height:11px; fill:var(--amber)}
+.vista{color:var(--brand-dark)}
+.vista button{border:none; background:none; color:var(--danger); font-weight:700; font-family:inherit; font-size:inherit; text-decoration:underline; padding:0 2px}
+.cmenu{position:fixed; z-index:95; width:270px; background:#fff; border:1px solid var(--line); border-radius:12px; box-shadow:0 16px 40px rgba(16,49,44,.2); padding:10px; display:flex; flex-direction:column; gap:8px; overflow:hidden}
+.cmenu.hidden{display:none !important}
+.cm-tit{display:flex; justify-content:space-between; align-items:center; font-family:'Archivo',sans-serif; font-weight:800; font-size:.9rem}
+.cm-x{border:none; background:none; font-size:1rem; color:var(--muted); padding:2px 6px}
+.cm-ord{display:grid; grid-template-columns:1fr 1fr; gap:6px}
+.cm-ord button{border:1.5px solid var(--line); background:#FBFDFC; border-radius:9px; padding:8px 6px; font-weight:700; font-size:.8rem; color:var(--ink)}
+.cm-ord button.on{background:var(--brand); border-color:var(--brand); color:#fff}
+.cm-sub{font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin-top:2px}
+.cm-busca{padding:8px 10px !important; font-size:15px}
+.cm-lista{overflow-y:auto; min-height:60px; flex:1 1 auto; border-top:1px solid var(--line); padding-top:4px}
+.cm-item{display:flex; align-items:center; gap:8px; padding:6px 4px; font-size:.84rem; cursor:pointer; border-radius:7px}
+.cm-item:hover{background:var(--brand-soft)}
+.cm-item input{width:17px; height:17px; accent-color:var(--brand); flex:none}
+.cm-item span{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.cm-item small{font-family:'IBM Plex Mono',monospace; font-size:.7rem; color:var(--muted)}
+.cm-todos{font-weight:700}
+.cm-pe{display:flex; gap:8px; justify-content:flex-end}
+@media(max-width:600px){
+  .cmenu{left:0 !important; right:0; bottom:0 !important; top:auto !important; width:auto; max-height:75vh !important; border-radius:16px 16px 0 0; padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
+}
 .fila-ed{background:var(--amber-soft); border:1px solid #EED9AC; border-radius:12px; padding:12px 14px; margin-bottom:10px}
 .fila-ed h4{font-family:'Archivo',sans-serif; font-weight:800; font-size:.92rem; color:#5C4308; margin-bottom:2px}
 .fila-ed .item{display:flex; gap:10px; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; padding:9px 0; border-top:1px dashed #E3CD9C}
@@ -255,7 +330,7 @@ h3.blk{font-family:'Archivo',sans-serif; font-weight:800; font-size:1.05rem; mar
   <div class="top-row">
     <div class="brand">
       <h1>CAIS</h1>
-      <span class="sub">Coleta de campo · Pesquisa de implementação</span>
+      <span class="sub">Coleta de campo<span class="so-largo"> · Pesquisa de implementação</span></span>
     </div>
     <button class="queue-pill" id="queuePill" onclick="syncQueue()">⟳ <span id="queueN">0</span> na fila</button>
   </div>
@@ -278,15 +353,13 @@ h3.blk{font-family:'Archivo',sans-serif; font-weight:800; font-size:1.05rem; mar
     <a class="qbox b" href="encaminhamentos.html"><span class="qi">🗺️</span>Mapa de encaminhamentos</a>
   </div>
 
-  <div class="pbar" id="pbar">
-    <div>
-      <div class="pb-tit" id="pbTit">Novo atendido</div>
-      <div class="pb-sub" id="pbSub">Cadastro inicial desta pessoa</div>
-    </div>
-    <div class="pb-acoes">
-      <button type="button" class="btn btn-ghost btn-sm" id="btnRetorno" onclick="abrirRetorno()">↩ Retorno de atendido</button>
-      <button type="button" class="btn btn-ghost btn-sm hidden" id="btnNovo" onclick="novoAtendido(true)">+ Novo atendido</button>
-    </div>
+  <div class="modo" id="pbar">
+    <button type="button" class="modo-box on" id="btnNovo" onclick="if(state.pessoa) novoAtendido(true)">
+      <span class="mi">＋</span><span class="mt"><b>Novo atendido</b><small>Primeiro cadastro</small></span>
+    </button>
+    <button type="button" class="modo-box" id="btnRetorno" onclick="abrirRetorno()">
+      <span class="mi">↩</span><span class="mt"><b id="pbTit">Retorno de atendido</b><small id="pbSub">Quem já foi atendido</small></span>
+    </button>
   </div>
 
   <form id="formAtend" onsubmit="return false">
@@ -324,7 +397,6 @@ h3.blk{font-family:'Archivo',sans-serif; font-weight:800; font-size:1.05rem; mar
       <div class="field">
         <label class="flabel" for="f_tel">Telefone de contato</label>
         <input type="tel" id="f_tel" name="telefone" inputmode="tel" autocomplete="off" placeholder="(21) 9XXXX-XXXX, quando houver">
-        <p class="hint">Opcional. Se for WhatsApp, o banco de dados mostra um atalho para a conversa com a pessoa.</p>
       </div>
       <div class="field">
         <label class="flabel">Data de nascimento (faixa)</label>
@@ -426,7 +498,6 @@ h3.blk{font-family:'Archivo',sans-serif; font-weight:800; font-size:1.05rem; mar
           <button type="button" class="chip">Medicação sem prescrição</button><button type="button" class="chip">Outras</button>
           <button type="button" class="chip">Nega uso</button><button type="button" class="chip">Não informado</button>
         </div>
-        <p class="hint">Pode marcar mais de uma substância. Marcar duas ou mais já caracteriza o uso múltiplo, então não há chip de polidependência.</p>
         <div class="sub-field hidden" id="fSubstOutras">
           <label class="slabel" for="f_subst_outras">Outras, quais?</label>
           <input type="text" id="f_subst_outras" name="substancias_outras" autocomplete="off" placeholder="Nomes como a pessoa usa, separados por vírgula">
@@ -487,7 +558,6 @@ h3.blk{font-family:'Archivo',sans-serif; font-weight:800; font-size:1.05rem; mar
       <div class="field">
         <label class="flabel" for="f_doc">Digite (CPF ou RG)</label>
         <input type="text" id="f_doc" name="doc_numero" inputmode="numeric" autocomplete="off" placeholder="Somente números (entra como texto)">
-        <p class="hint">Usado para reconhecer retornos da mesma pessoa. Deixe em branco se não possuir.</p>
       </div>
       <div class="field">
         <label class="flabel">Qual demanda possui no momento?</label>
@@ -532,7 +602,6 @@ h3.blk{font-family:'Archivo',sans-serif; font-weight:800; font-size:1.05rem; mar
           <label class="slabel" for="f_encam_qual">Para onde, exatamente?</label>
           <input type="text" id="f_encam_qual" name="encaminhamento_qual" autocomplete="off" placeholder="Ex.: CAPS AD Heleno de Freitas, CMS JBB, Poupa Tempo Centro">
         </div>
-        <p class="hint">Pode marcar mais de um serviço. É este campo que alimenta a efetividade dos encaminhamentos no painel.</p>
       </div>
 
 
@@ -542,7 +611,6 @@ h3.blk{font-family:'Archivo',sans-serif; font-weight:800; font-size:1.05rem; mar
           <button type="button" class="thumb pos" id="thumbPos" onclick="setAval('Positivo')"><span class="ico">👍</span>Positivo</button>
           <button type="button" class="thumb neg" id="thumbNeg" onclick="setAval('Negativo')"><span class="ico">👎</span>Negativo</button>
         </div>
-        <p class="hint">Toque para registrar. Toque de novo para desmarcar.</p>
       </div>
       <div class="field">
         <label class="flabel">Gravação da entrevista (áudio)</label>
@@ -558,7 +626,6 @@ h3.blk{font-family:'Archivo',sans-serif; font-weight:800; font-size:1.05rem; mar
           </div>
           <input type="file" id="audioInput" accept="audio/*,.m4a,.mp3,.aac,.ogg,.wav" hidden onchange="pickAudio(this)">
         </div>
-        <p class="hint">O consentimento LGPD deve estar registrado dentro da própria gravação. Arquivos de até ~20 MB (cerca de 20 a 30 min em AAC).</p>
       </div>
     </section>
   </form>
@@ -579,11 +646,12 @@ h3.blk{font-family:'Archivo',sans-serif; font-weight:800; font-size:1.05rem; mar
     <button type="button" class="btn btn-ghost btn-sm" id="btnBanco" onclick="recarregarBanco()">↻ Atualizar</button>
     <button type="button" class="btn btn-ghost btn-sm" id="btnAdmin" onclick="openModal('mAdmin')">🔑 Administrador</button>
   </div>
-  <div class="db-info"><span id="dbCont"></span><span id="dbVivo"></span><span>Toque na linha para ver os atendimentos da pessoa</span></div>
+  <div class="db-info"><span id="dbCont"></span><span id="dbVivo"></span><span id="dbVista"></span><span>Toque na linha para ver os atendimentos da pessoa · toque no título da coluna para ordenar ou filtrar</span></div>
+  <div class="cmenu hidden" id="dbMenu"></div>
   <div class="fila-ed hidden" id="dbPend"></div>
   <div class="db-rol">
     <table class="db">
-      <thead><tr><th>Nome</th><th>Atend.</th><th>Último</th><th>Polo</th><th>Idade</th><th>Gênero</th><th>Raça/cor</th><th>Moradia</th><th>Bairro</th><th>Substâncias</th><th>Documentação</th><th>CPF/RG</th><th>Telefone</th><th>Último encaminhamento</th><th>Equipe</th><th></th></tr></thead>
+      <thead><tr id="dbHead"></tr></thead>
       <tbody id="dbCorpo"></tbody>
     </table>
   </div>
@@ -1189,13 +1257,12 @@ function novoAtendido(limpar){
 
 function marcarBarra(){
   const p = state.pessoa;
-  $('#pbar').classList.toggle('retorno', !!p);
-  $('#btnNovo').classList.toggle('hidden', !p);
-  $('#btnRetorno').classList.toggle('hidden', !!p);
+  $('#btnNovo').classList.toggle('on', !p);
+  $('#btnRetorno').classList.toggle('on', !!p);
   $('#fEncamAnterior').classList.toggle('hidden', !p);
   if(p){
-    $('#pbTit').textContent = '↩ ' + (p.nome || 'Atendido');
-    $('#pbSub').textContent = `${(Number(p.n)||1)+1}º atendimento · ${p.id_pessoa}`;
+    $('#pbTit').textContent = p.nome || 'Atendido';
+    $('#pbSub').textContent = `${(Number(p.n)||1)+1}º atendimento`;
     const ue = p.ultimo_encaminhamento || '';
     $('#encamAntLabel').textContent = ue
       ? `A pessoa chegou ao serviço para onde foi encaminhada (${ue})?`
@@ -1205,8 +1272,8 @@ function marcarBarra(){
   } else {
     $('#encamLabel').textContent = 'Encaminhamento feito neste atendimento';
     clearChips('encaminhamento_efetivado');
-    $('#pbTit').textContent = 'Novo atendido';
-    $('#pbSub').textContent = 'Cadastro inicial desta pessoa';
+    $('#pbTit').textContent = 'Retorno de atendido';
+    $('#pbSub').textContent = 'Quem já foi atendido';
   }
 }
 
@@ -1734,17 +1801,164 @@ function bolinhaWa(tel){
   return n ? `<a class="wa" href="https://wa.me/${n}" target="_blank" rel="noopener" title="Abrir conversa no WhatsApp">${ICO_FONE}</a>` : '';
 }
 
+/* ---------- colunas do planilhão: ordenar e filtrar ----------
+   Cada coluna diz de onde vem o valor (v), como ordenar e como filtrar.
+   f:'vazio' filtra só por preenchido/vazio (nome, documento, telefone);
+   multi separa valores com ";" (uma pessoa conta em cada substância). */
+const VAZIO = '(vazio)', PREENCHIDO = '(preenchido)';
+const ORDEM_IDADE = ['≤17','18–29','30–44','45–59','≥60'];
+const separa = t => String(t||'').split(';').map(x=>x.trim()).filter(Boolean);
+const COLS = [
+  { k:'nome', r:'Nome', v:p=>p.nome, f:'vazio' },
+  { k:'n', r:'Atend.', v:p=>p.n, num:true },
+  { k:'ultima', r:'Último', v:p=>p.ultima_data, grupo:d=>d.slice(5,7)+'/'+d.slice(0,4), rotGrupo:'mês' },
+  { k:'polo', r:'Polo', v:p=>p.campos.polo },
+  { k:'faixa_etaria', r:'Idade', v:p=>p.campos.faixa_etaria, ordem:ORDEM_IDADE },
+  { k:'genero', r:'Gênero', v:p=>p.campos.genero==='Outros' && p.campos.genero_outro ? p.campos.genero_outro : p.campos.genero },
+  { k:'raca_cor', r:'Raça/cor', v:p=>p.campos.raca_cor },
+  { k:'moradia', r:'Moradia', v:p=>p.campos.moradia },
+  { k:'bairro', r:'Bairro', v:p=>p.campos.bairro },
+  { k:'substancias', r:'Substâncias', v:p=>p.campos.substancias, multi:true },
+  { k:'documentacao', r:'Documentação', v:p=>p.campos.documentacao },
+  { k:'doc', r:'CPF/RG', v:p=>p.doc_numero, f:'vazio' },
+  { k:'tel', r:'Telefone', v:p=>p.telefone, f:'vazio' },
+  { k:'encam', r:'Último encaminhamento', v:p=>p.ultimo_encaminhamento, multi:true, limpa:x=>x.replace(/\s*\(.*$/,'') },
+  { k:'equipe', r:'Equipe', v:p=>p.equipe }
+];
+const colDe = k => COLS.find(c=>c.k===k);
+const vazioV = x => x == null || String(x).trim() === '';
+
+// valores de filtro de uma pessoa numa coluna
+function valoresFiltro(c, p){
+  const x = c.v(p);
+  if(c.f === 'vazio') return [vazioV(x) ? VAZIO : PREENCHIDO];
+  if(vazioV(x)) return [VAZIO];
+  if(c.multi){ const l = separa(x).map(c.limpa || (y=>y)).filter(Boolean); return l.length ? l : [VAZIO]; }
+  if(c.grupo) return [c.grupo(String(x))];
+  return [String(x)];
+}
+
+// o que cada pessoa escolheu ver fica guardado no próprio aparelho
+let VISTA = { ord:null, filt:{} };
+try{
+  const v = JSON.parse(localStorage.getItem('cais_db_vista') || 'null');
+  if(v){ VISTA.ord = v.ord && colDe(v.ord.k) ? v.ord : null; Object.keys(v.filt||{}).forEach(k=>{ if(colDe(k)) VISTA.filt[k] = new Set(v.filt[k]); }); }
+}catch(e){}
+function guardarVista(){
+  try{ localStorage.setItem('cais_db_vista', JSON.stringify({ ord:VISTA.ord, filt:Object.fromEntries(Object.entries(VISTA.filt).map(([k,s])=>[k,[...s]])) })); }catch(e){}
+}
+
+function comparar(c, a, b){
+  const x = c.v(a), y = c.v(b);
+  const vx = vazioV(x), vy = vazioV(y);
+  if(vx || vy) return vx === vy ? 0 : (vx ? 1 : -1);     // vazio sempre no fim
+  if(c.num) return Number(x) - Number(y);
+  if(c.ordem){ const i = c.ordem.indexOf(String(x)), j = c.ordem.indexOf(String(y)); if(i >= 0 && j >= 0) return i - j; }
+  return String(x).localeCompare(String(y), 'pt-BR', { numeric:true, sensitivity:'base' });
+}
+function ordenarFiltrar(lista){
+  Object.entries(VISTA.filt).forEach(([k, ok])=>{
+    const c = colDe(k);
+    lista = lista.filter(p=>valoresFiltro(c, p).some(x=>ok.has(x)));
+  });
+  const o = VISTA.ord;
+  if(o){
+    const c = colDe(o.k), s = o.dir === 'desc' ? -1 : 1;
+    return lista.sort((a,b)=>{
+      const vazA = vazioV(c.v(a)), vazB = vazioV(c.v(b));
+      if(vazA !== vazB) return vazA ? 1 : -1;
+      return s * comparar(c, a, b) || String(b.ultimo.registro_em).localeCompare(String(a.ultimo.registro_em));
+    });
+  }
+  return lista.sort((a,b)=>String(b.ultimo.registro_em).localeCompare(String(a.ultimo.registro_em)));
+}
+
+const ICO_FUNIL = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8.5V19l-4 2v-7.5z"/></svg>';
+function desenharCabecalho(){
+  const o = VISTA.ord;
+  $('#dbHead').innerHTML = COLS.map(c=>{
+    const ord = o && o.k === c.k ? (o.dir === 'asc' ? '↑' : '↓') : '';
+    const fil = !!VISTA.filt[c.k];
+    return `<th class="thc${fil?' f':''}${ord?' o':''}" data-col="${c.k}" title="Ordenar ou filtrar"><span class="thl">${c.r}<span class="ti">${ord || '▾'}</span>${fil ? ICO_FUNIL : ''}</span></th>`;
+  }).join('') + '<th></th>';
+  const partes = [];
+  if(o) partes.push(`ordem: ${colDe(o.k).r} ${o.dir === 'asc' ? '↑' : '↓'}`);
+  const fk = Object.keys(VISTA.filt);
+  if(fk.length) partes.push('filtro: ' + fk.map(k=>colDe(k).r).join(', '));
+  $('#dbVista').innerHTML = partes.length ? `<span class="vista">${escapar(partes.join(' · '))} <button type="button" onclick="limparVista()">limpar</button></span>` : '';
+}
+function limparVista(){ VISTA = { ord:null, filt:{} }; guardarVista(); fecharMenuCol(); renderBanco(); }
+
+let menuCol = null;
+function fecharMenuCol(){ menuCol = null; $('#dbMenu').classList.add('hidden'); }
+function abrirMenuCol(k, th){
+  if(menuCol === k){ fecharMenuCol(); return; }
+  menuCol = k;
+  const c = colDe(k), m = $('#dbMenu');
+  const cont = new Map();
+  DADOS.pessoas.forEach(p=>new Set(valoresFiltro(c, p)).forEach(x=>cont.set(x, (cont.get(x)||0) + 1)));
+  const vals = [...cont.keys()].sort((a,b)=>{
+    if(a === VAZIO || b === VAZIO) return a === VAZIO ? 1 : -1;
+    if(c.ordem){ const i = c.ordem.indexOf(a), j = c.ordem.indexOf(b); if(i >= 0 && j >= 0) return i - j; }
+    if(c.grupo) return b.slice(3).localeCompare(a.slice(3)) || b.localeCompare(a);   // mês mais recente primeiro
+    if(c.num) return Number(a) - Number(b);
+    return a.localeCompare(b, 'pt-BR', { numeric:true, sensitivity:'base' });
+  });
+  const ok = VISTA.filt[k];
+  const marcado = v => !ok || ok.has(v);
+  m.innerHTML = `<div class="cm-tit">${escapar(c.r)}<button type="button" class="cm-x" data-a="fechar" aria-label="Fechar">✕</button></div>
+    <div class="cm-ord"><button type="button" data-a="asc" class="${VISTA.ord && VISTA.ord.k===k && VISTA.ord.dir==='asc'?'on':''}">↑ Crescente</button><button type="button" data-a="desc" class="${VISTA.ord && VISTA.ord.k===k && VISTA.ord.dir==='desc'?'on':''}">↓ Decrescente</button></div>
+    <div class="cm-sub">Filtrar${c.grupo ? ' por ' + c.rotGrupo : ''}</div>
+    ${vals.length > 8 ? '<input type="text" class="cm-busca" placeholder="Buscar valor" autocomplete="off">' : ''}
+    <label class="cm-item cm-todos"><input type="checkbox" data-a="todos" ${!ok ? 'checked' : ''}><span>Selecionar todos</span></label>
+    <div class="cm-lista">${vals.map(v=>`<label class="cm-item"><input type="checkbox" data-v="${escapar(v)}" ${marcado(v)?'checked':''}><span>${escapar(v)}</span><small>${cont.get(v)}</small></label>`).join('')}</div>
+    <div class="cm-pe"><button type="button" class="btn btn-ghost btn-sm" data-a="limpar">Limpar filtro</button><button type="button" class="btn btn-brand btn-sm" data-a="fechar">OK</button></div>`;
+  m.classList.remove('hidden');
+  if(window.innerWidth > 600){
+    const r = th.getBoundingClientRect(), w = 270;
+    m.style.left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8)) + 'px';
+    const cabe = window.innerHeight - r.bottom - 12;
+    if(cabe >= 260){ m.style.top = (r.bottom + 4) + 'px'; m.style.bottom = 'auto'; m.style.maxHeight = cabe + 'px'; }
+    else { m.style.top = 'auto'; m.style.bottom = (window.innerHeight - r.top + 4) + 'px'; m.style.maxHeight = (r.top - 12) + 'px'; }
+  } else { m.style.left = m.style.top = m.style.bottom = m.style.maxHeight = ''; }
+  const busca = m.querySelector('.cm-busca');
+  if(busca) busca.oninput = ()=>{ const q = normaliza(busca.value); m.querySelectorAll('.cm-lista .cm-item').forEach(l=>l.classList.toggle('hidden', !!q && !normaliza(l.textContent).includes(q))); };
+}
+function aplicarFiltroMenu(){
+  const k = menuCol, m = $('#dbMenu'), caixas = [...m.querySelectorAll('.cm-lista input')];
+  const sel = caixas.filter(x=>x.checked).map(x=>x.dataset.v);
+  if(sel.length === caixas.length) delete VISTA.filt[k]; else VISTA.filt[k] = new Set(sel);
+  m.querySelector('[data-a="todos"]').checked = sel.length === caixas.length;
+  guardarVista(); renderBanco();
+}
+$('#dbMenu').addEventListener('click', ev=>{
+  const b = ev.target.closest('button[data-a]'); if(!b) return;
+  const a = b.dataset.a, k = menuCol;
+  if(a === 'asc' || a === 'desc'){ VISTA.ord = { k, dir:a }; guardarVista(); fecharMenuCol(); renderBanco(); }
+  else if(a === 'limpar'){ delete VISTA.filt[k]; guardarVista(); fecharMenuCol(); renderBanco(); }
+  else if(a === 'fechar') fecharMenuCol();
+});
+$('#dbMenu').addEventListener('change', ev=>{
+  const x = ev.target; if(!x.matches('input[type=checkbox]')) return;
+  if(x.dataset.a === 'todos') $$('#dbMenu .cm-lista input').forEach(y=>y.checked = x.checked);
+  aplicarFiltroMenu();
+});
+$('#dbHead').addEventListener('click', ev=>{ const th = ev.target.closest('th[data-col]'); if(th) abrirMenuCol(th.dataset.col, th); });
+document.addEventListener('click', ev=>{ if(menuCol && !ev.target.closest('#dbMenu') && !ev.target.closest('#dbHead')) fecharMenuCol(); });
+document.addEventListener('keydown', ev=>{ if(ev.key === 'Escape' && menuCol) fecharMenuCol(); });
+
 function renderBanco(){
   const alvo = $('#dbCorpo'); if(!alvo) return;
   const bruto = $('#dbBusca').value, q = normaliza(bruto), qd = soDigitos(bruto);
   const pend = DADOS.edicoes.filter(e=>e.estado==='pendente');
   const pendDe = {}; pend.forEach(e=>{ pendDe[e.atendimento_id] = (pendDe[e.atendimento_id]||0) + 1; });
 
-  const lista = DADOS.pessoas.filter(p=>{
+  const lista = ordenarFiltrar(DADOS.pessoas.filter(p=>{
     if(!q) return true;
     const txt = normaliza([p.nome, p.campos.bairro, p.campos.endereco, p.campos.polo, p.equipe, p.campos.moradia].join(' '));
     return txt.includes(q) || (qd.length >= 3 && (soDigitos(p.doc_numero).includes(qd) || soDigitos(p.telefone).includes(qd)));
-  }).sort((a,b)=>String(b.ultimo.registro_em).localeCompare(String(a.ultimo.registro_em)));
+  }));
+  desenharCabecalho();
 
   $('#dbCont').textContent = DADOS.ok
     ? `${lista.length} de ${DADOS.pessoas.length} pessoas · ${DADOS.atend.length} atendimentos`

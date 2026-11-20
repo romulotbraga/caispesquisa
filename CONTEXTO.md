@@ -60,12 +60,19 @@ Iguais às do painel antigo (conferido com os números do Apps Script em 20/11/2
 - Registros sem polo entram só na coluna Total.
 - Tempo até o 1º atendimento não é coletado.
 
+## Coleta no celular
+
+- Abaixo de 600 px: título só "CAIS · Coleta de campo", opções (chips) esticam para preencher a linha, exceto a última linha; faixa etária em 5 colunas; campos e espaçamentos menores.
+- No topo, dois boxes lado a lado: Novo atendido e Retorno de atendido (`#btnNovo`, `#btnRetorno`, dentro de `#pbar`). O ativo fica verde; no retorno, o box mostra o nome e o número do atendimento.
+- Romulo pediu para tirar as frases de ajuda do telefone, das substâncias, do CPF/RG, do encaminhamento, da avaliação e da gravação (consentimento). Não recolocar.
+
 ## Planilhão (aba Banco de dados)
 
 - Uma linha por pessoa, com os dados do atendimento mais recente. O toque na linha abre os atendimentos dela.
 - Bolinha verde ao lado do nome quando o telefone é válido: abre a conversa no WhatsApp (sem DDD, assume 21).
 - Lápis no fim da linha abre a ficha completa do último atendimento; cada atendimento aberto tem o seu lápis.
 - Edições pendentes aparecem numa caixa no topo; os botões Aprovar e Recusar só aparecem para o administrador.
+- Títulos das colunas clicáveis: ordenar (crescente/decrescente) e filtrar por valores, como numa planilha. As colunas ficam na lista `COLS` (de onde vem o valor, ordem especial da idade, filtro por mês na data, filtro só preenchido/vazio em nome, documento e telefone, valores separados por ";" em substâncias e encaminhamento). A escolha de cada pessoa fica guardada no próprio aparelho (`cais_db_vista`); "limpar" desfaz.
 
 ## Migração da planilha (20/11/2026)
 
@@ -86,6 +93,7 @@ A leitura direta da planilha (esquema `migracao` e extensão `http`) foi removid
 
 ## Histórico
 
+- 2026-11-20: celular mais compacto (título curto, boxes Novo/Retorno, data sem vazar, opções preenchendo a linha, frases de ajuda retiradas; formulário cerca de 27% mais curto). Planilhão com ordenar e filtrar nos títulos. Guia refeito com as telas novas.
 - 2026-11-20: guia rápido em PDF (pasta `guia/`). No planilhão, a bolinha do WhatsApp deixou de ser cortada em nomes longos.
 - 2026-11-20: site novo publicado pelo Netlify a partir do repositório. A fila offline aceita registros deixados pelo site antigo no aparelho (tira o apóstrofo do documento e cria o `client_id`).
 - 2026-11-20: migração da planilha para o Supabase; site passa a ler e gravar no banco; aba Banco de dados (planilhão em tempo real, edição com aprovação, WhatsApp); campo telefone; frentes do PROJAD; três atalhos em boxes no topo.
