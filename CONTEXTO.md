@@ -77,7 +77,8 @@ A leitura direta da planilha (esquema `migracao` e extensão `http`) foi removid
 - [x] Netlify ligado ao repositório em 20/11/2026; o site novo está no ar e lendo o banco (conferido nos registros de acesso do Supabase).
 - [x] Leitura da planilha desligada em 20/11/2026.
 - [x] Site URL do login configurado e primeiro login de administrador feito em 20/11/2026; edição aprovada e áudio enviado no teste do Romulo.
-- [ ] Apagar o atendimento "Teste" (id 99) e a gravação dele, se o Romulo confirmar.
+- [x] Atendimentos de teste apagados em 20/11/2026 (4 registros com nome "Teste"; o banco ficou com 93 atendimentos). Falta o Romulo apagar o arquivo de áudio de teste em Storage > audios.
+- [ ] Romulo decidir se o atendimento sem nome lançado por "Testador" em 20/10 e as 3 oficinas "Oficina de música" de 22/08 são teste.
 - [ ] Romulo: restringir o compartilhamento da planilha (está legível por qualquer pessoa com o link).
 - [ ] O envio de e-mail do mapa ainda usa um Apps Script próprio (`EMAIL_URL` em `encaminhamentos.html`), que não depende da planilha.
 - [ ] Preencher os 6 atendimentos sem polo (Romulo disse que são PROJAD/UFRJ).
