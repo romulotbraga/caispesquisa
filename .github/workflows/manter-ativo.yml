@@ -1,0 +1,15 @@
+# O projeto do banco está no plano free do Supabase, que pausa depois de uma
+# semana sem uso. Esta leitura diária mantém o projeto acordado.
+name: Manter o banco ativo
+on:
+  schedule:
+    - cron: '17 9 * * *'   # todo dia, 06h17 em Brasília
+  workflow_dispatch:
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Leitura mínima no banco
+        run: |
+          curl -fsS "https://odlexesnjlglpvrhhujd.supabase.co/rest/v1/pontos_rede?select=id&limit=1" \
+            -H "apikey: sb_publishable_nAbw9pHMK8QJYuKCowivgQ_IHUE9MdM"
