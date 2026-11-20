@@ -1294,7 +1294,11 @@ function nomeSeguro(n){
 async function enviar(p){
   const sb = CAIS.exigir();
   if(p.tipo === 'atendimento'){
+    // registros que ficaram na fila do site antigo (antes do banco) também sobem por aqui
+    if(!p.dados.client_id) p.dados.client_id = CAIS.uuid();
     const d = Object.assign({}, p.dados);
+    if(typeof d.doc_numero === 'string') d.doc_numero = d.doc_numero.replace(/^'/, '');
+    delete d.n_atendimento;
     if(p.audioBase64){
       const caminho = nomeSeguro(p.audioNome);
       const r = await sb.storage.from('audios').upload(caminho, b64Blob(p.audioBase64, p.audioTipo), { contentType: p.audioTipo || 'audio/mp4', upsert:false });

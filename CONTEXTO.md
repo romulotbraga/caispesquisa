@@ -83,8 +83,8 @@ Depois da virada do site, apagar: `drop schema migracao cascade; drop extension 
 
 ## Pendências
 
-- [ ] Romulo: ligar o Netlify ao repositório (hoje o site antigo ainda está publicado e grava na planilha).
-- [ ] Claude: no dia da virada, rodar `migracao.trazer` (acima) e apagar o esquema `migracao`.
+- [x] Netlify ligado ao repositório em 20/11/2026; o site novo está no ar e lendo o banco (conferido nos registros de acesso do Supabase).
+- [ ] Claude: rodar `migracao.trazer` (acima) uma última vez depois dos testes do Romulo e apagar o esquema `migracao`. Em 20/11, logo após a publicação, não havia nada novo na planilha. Quem estiver com o site antigo aberto no celular ainda grava na planilha até recarregar a página.
 - [ ] Romulo: no Supabase, Authentication > URL Configuration, pôr `https://caispesquisa.netlify.app` como Site URL (sem isso o link de login abre uma página que não existe; o plano B de colar o link funciona).
 - [ ] Romulo: primeiro login como administrador e teste de aprovação.
 - [ ] Romulo: restringir o compartilhamento da planilha (está legível por qualquer pessoa com o link).
@@ -94,4 +94,5 @@ Depois da virada do site, apagar: `drop schema migracao cascade; drop extension 
 
 ## Histórico
 
+- 2026-11-20: site novo publicado pelo Netlify a partir do repositório. A fila offline aceita registros deixados pelo site antigo no aparelho (tira o apóstrofo do documento e cria o `client_id`).
 - 2026-11-20: migração da planilha para o Supabase; site passa a ler e gravar no banco; aba Banco de dados (planilhão em tempo real, edição com aprovação, WhatsApp); campo telefone; frentes do PROJAD; três atalhos em boxes no topo.
