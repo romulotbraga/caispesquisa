@@ -59,17 +59,17 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
 .sub-field{margin-top:10px; padding-left:12px; border-left:3px solid var(--brand-soft)}
 .sub-field .slabel{display:block; font-weight:700; font-size:.82rem; color:var(--brand-dark); margin-bottom:6px}
 /* frentes do PROJAD: surgem em cascata quando o polo PROJAD/UFRJ é marcado */
-#fFrentes{animation:frAbre .3s ease-out backwards; transform-origin:top left}
-#fFrentes .slabel{animation:frSobe .3s ease-out .05s backwards}
-#fFrentes .chip{animation:frChip .42s cubic-bezier(.34,1.56,.64,1) backwards}
-#fFrentes .chip:nth-child(1){animation-delay:.1s}
-#fFrentes .chip:nth-child(2){animation-delay:.18s}
-#fFrentes .chip:nth-child(3){animation-delay:.26s}
-#fFrentes .chip:nth-child(4){animation-delay:.34s}
+.frentes-box{animation:frAbre .3s ease-out backwards; transform-origin:top left}
+.frentes-box .slabel{animation:frSobe .3s ease-out .05s backwards}
+.frentes-box .chip{animation:frChip .42s cubic-bezier(.34,1.56,.64,1) backwards}
+.frentes-box .chip:nth-child(1){animation-delay:.1s}
+.frentes-box .chip:nth-child(2){animation-delay:.18s}
+.frentes-box .chip:nth-child(3){animation-delay:.26s}
+.frentes-box .chip:nth-child(4){animation-delay:.34s}
 @keyframes frAbre{from{opacity:0; border-left-color:transparent; transform:translateY(-6px)} to{opacity:1; transform:none}}
 @keyframes frSobe{from{opacity:0; transform:translateY(-4px)} to{opacity:1; transform:none}}
 @keyframes frChip{0%{opacity:0; transform:translateY(8px) scale(.85)} 100%{opacity:1; transform:none}}
-@media(prefers-reduced-motion:reduce){#fFrentes, #fFrentes .slabel, #fFrentes .chip{animation:none}}
+@media(prefers-reduced-motion:reduce){.frentes-box, .frentes-box .slabel, .frentes-box .chip{animation:none}}
 
 /* pares sim/não lado a lado */
 .pair{display:grid; gap:14px}
@@ -423,7 +423,7 @@ h3.blk{font-family:'Archivo',sans-serif; font-weight:800; font-size:1.05rem; mar
           <button type="button" class="chip">Espaço Normal</button>
           <button type="button" class="chip">PROJAD/UFRJ</button>
         </div>
-        <div class="sub-field hidden" id="fFrentes">
+        <div class="sub-field frentes-box hidden" id="fFrentes">
           <label class="slabel">Frente de atuação do PROJAD (opcional)</label>
           <div class="chips multi" data-name="frentes" data-multi="1">
             <button type="button" class="chip">RUAS</button><button type="button" class="chip">Capoeira</button>
@@ -763,6 +763,13 @@ h3.blk{font-family:'Archivo',sans-serif; font-weight:800; font-size:1.05rem; mar
     <p class="msub">Registro rápido de atividade de reabilitação psicossocial.</p>
     <div class="field"><label class="flabel">Polo</label>
       <div class="chips" data-name="of_polo"><button type="button" class="chip">Espaço Normal</button><button type="button" class="chip">PROJAD/UFRJ</button></div>
+      <div class="sub-field frentes-box hidden" id="of_frentes_box">
+        <label class="slabel">Frente de atuação do PROJAD (opcional)</label>
+        <div class="chips multi" data-name="of_frentes" data-multi="1">
+          <button type="button" class="chip">RUAS</button><button type="button" class="chip">Capoeira</button>
+          <button type="button" class="chip">CnaR</button><button type="button" class="chip">PROJAD PV</button>
+        </div>
+      </div>
     </div>
     <div class="field"><label class="flabel" for="of_data">Data</label><input type="date" id="of_data"></div>
     <div class="field"><label class="flabel" for="of_nome">Nome da atividade</label><input type="text" id="of_nome" placeholder="Ex.: Oficina de música, roda de conversa…"></div>
@@ -786,6 +793,13 @@ h3.blk{font-family:'Archivo',sans-serif; font-weight:800; font-size:1.05rem; mar
     <p class="msub">Articulação com saúde, SUAS, justiça e outros setores.</p>
     <div class="field"><label class="flabel">Polo</label>
       <div class="chips" data-name="in_polo"><button type="button" class="chip">Espaço Normal</button><button type="button" class="chip">PROJAD/UFRJ</button></div>
+      <div class="sub-field frentes-box hidden" id="in_frentes_box">
+        <label class="slabel">Frente de atuação do PROJAD (opcional)</label>
+        <div class="chips multi" data-name="in_frentes" data-multi="1">
+          <button type="button" class="chip">RUAS</button><button type="button" class="chip">Capoeira</button>
+          <button type="button" class="chip">CnaR</button><button type="button" class="chip">PROJAD PV</button>
+        </div>
+      </div>
     </div>
     <div class="field"><label class="flabel" for="in_data">Data</label><input type="date" id="in_data"></div>
     <div class="field"><label class="flabel">Setores envolvidos</label>
@@ -943,6 +957,11 @@ function clearChips(name){
 
 /* condicionais */
 function onChanged(name){
+  if(name==='of_polo' || name==='in_polo'){
+    const k = name.slice(0,2), projad = chipVal(name)==='PROJAD/UFRJ';
+    $('#'+k+'_frentes_box').classList.toggle('hidden', !projad);
+    if(!projad) clearChips(k+'_frentes');
+  }
   if(name==='polo'){
     const projad = chipVal('polo')==='PROJAD/UFRJ';
     $('#fFrentes').classList.toggle('hidden', !projad);
@@ -1659,21 +1678,23 @@ async function submitOficina(){
   if(!chipVal('of_polo') || !$('#of_nome').value.trim()){ toast('Informe polo e nome da atividade.','err'); return; }
   const ok = await sendOrQueue({ tipo:'oficina', fotos:fotosParaEnvio('of'), quem:umEspaco($('#f_equipe').value), dados:{
     client_id:CAIS.uuid(), registro_em:new Date().toISOString(), data:$('#of_data').value, polo:chipVal('of_polo'),
+    frentes: chipVal('of_polo')==='PROJAD/UFRJ' ? chipVal('of_frentes') : '',
     atividade:$('#of_nome').value.trim(), participantes:$('#of_part').value.trim(), observacoes:$('#of_obs').value.trim()
   }}, FOTOS_SEL.of.length ? `Oficina lançada com ${FOTOS_SEL.of.length} foto${FOTOS_SEL.of.length>1?'s':''} ✓` : 'Oficina lançada ✓');
   if(ok) carregarDados();
-  clearChips('of_polo'); ['of_nome','of_part','of_obs'].forEach(i=>$('#'+i).value=''); limparFotosSel('of');
+  clearChips('of_polo'); clearChips('of_frentes'); $('#of_frentes_box').classList.add('hidden'); ['of_nome','of_part','of_obs'].forEach(i=>$('#'+i).value=''); limparFotosSel('of');
   closeModal('mOficina');
 }
 async function submitInter(){
   if(!chipVal('in_polo')){ toast('Informe o polo.','err'); return; }
   const ok = await sendOrQueue({ tipo:'intersetorial', fotos:fotosParaEnvio('in'), quem:umEspaco($('#f_equipe').value), dados:{
     client_id:CAIS.uuid(), registro_em:new Date().toISOString(), data:$('#in_data').value, polo:chipVal('in_polo'),
+    frentes: chipVal('in_polo')==='PROJAD/UFRJ' ? chipVal('in_frentes') : '',
     setores:chipVal('in_setores'), participantes:$('#in_part').value.trim(),
     pauta:$('#in_pauta').value.trim()
   }}, FOTOS_SEL.in.length ? `Encontro lançado com ${FOTOS_SEL.in.length} foto${FOTOS_SEL.in.length>1?'s':''} ✓` : 'Encontro lançado ✓');
   if(ok) carregarDados();
-  clearChips('in_polo'); clearChips('in_setores'); ['in_part','in_pauta'].forEach(i=>$('#'+i).value=''); limparFotosSel('in');
+  clearChips('in_polo'); clearChips('in_setores'); clearChips('in_frentes'); $('#in_frentes_box').classList.add('hidden'); ['in_part','in_pauta'].forEach(i=>$('#'+i).value=''); limparFotosSel('in');
   closeModal('mInter');
 }
 
@@ -2003,6 +2024,7 @@ const MES = d=>d.slice(5,7)+'/'+d.slice(0,4);
 const COLS_OFI = [
   { k:'data', r:'Data', v:o=>o.data, grupo:MES, rotGrupo:'mês', mostra:o=>dataBR(o.data) },
   { k:'polo', r:'Polo', v:o=>o.polo },
+  { k:'frentes', r:'Frentes', v:o=>o.frentes, multi:true },
   { k:'atividade', r:'Atividade', v:o=>o.atividade },
   { k:'participantes', r:'Presentes', v:o=>o.participantes, num:true },
   { k:'fotos', r:'Fotos', v:o=>nFotos(o), num:true, fotos:true },
@@ -2012,6 +2034,7 @@ const COLS_OFI = [
 const COLS_INTER = [
   { k:'data', r:'Data', v:o=>o.data, grupo:MES, rotGrupo:'mês', mostra:o=>dataBR(o.data) },
   { k:'polo', r:'Polo', v:o=>o.polo },
+  { k:'frentes', r:'Frentes', v:o=>o.frentes, multi:true },
   { k:'setores', r:'Setores', v:o=>o.setores, multi:true },
   { k:'participantes', r:'Presentes', v:o=>o.participantes, num:true },
   { k:'fotos', r:'Fotos', v:o=>nFotos(o), num:true, fotos:true },
@@ -2024,10 +2047,10 @@ const ABAS_DB = {
     busca:'Buscar por nome, bairro, documento ou telefone',
     dica:'Toque na linha para ver os atendimentos da pessoa · toque no título da coluna para ordenar ou filtrar' },
   ofi:{ cols:COLS_OFI, chave:'cais_db_vista_ofi', linhas:()=>DADOS.ofi, recente:recenteAtiv, nome:'atividades',
-    texto:o=>[o.atividade, o.polo, o.observacoes].join(' '), busca:'Buscar por atividade, polo ou observação',
+    texto:o=>[o.atividade, o.polo, o.frentes, o.observacoes].join(' '), busca:'Buscar por atividade, polo ou observação',
     dica:'Toque na linha para ler as observações inteiras · toque no título da coluna para ordenar ou filtrar' },
   inter:{ cols:COLS_INTER, chave:'cais_db_vista_inter', linhas:()=>DADOS.inter, recente:recenteAtiv, nome:'encontros',
-    texto:o=>[o.setores, o.polo, o.pauta].join(' '), busca:'Buscar por setor, polo ou pauta',
+    texto:o=>[o.setores, o.polo, o.frentes, o.pauta].join(' '), busca:'Buscar por setor, polo ou pauta',
     dica:'Toque na linha para ler a pauta inteira · toque no título da coluna para ordenar ou filtrar' }
 };
 let DBT = 'atend';
@@ -2190,7 +2213,7 @@ function carregarXlsx(){
     document.head.appendChild(sc);
   });
 }
-const ROT_EXTRA = { id:'ID', registro_em:'Lançado em', id_pessoa:'ID da pessoa', tipo_registro:'Tipo de registro', n_atendimento:'Nº do atendimento',
+const ROT_EXTRA = { frentes:'Frentes', id:'ID', registro_em:'Lançado em', id_pessoa:'ID da pessoa', tipo_registro:'Tipo de registro', n_atendimento:'Nº do atendimento',
   substancias_n:'Nº de substâncias', uso_multiplo:'Uso múltiplo', primeiro_contato:'Primeiro contato com a rede',
   audio_nome:'Áudio (nome)', audio_url:'Áudio (link antigo)', audio_path:'Áudio (arquivo)', foto_em:'Foto em', foto_nome:'Foto (nome)', foto_url:'Foto (link)',
   atividade:'Atividade', participantes:'Presentes', observacoes:'Observações', setores:'Setores', pauta:'Pauta / resultado' };

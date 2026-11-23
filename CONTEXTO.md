@@ -31,6 +31,7 @@ Site de coleta de campo da pesquisa de implementação do CAIS (Rio de Janeiro),
 - `cais-db.js`: cliente do Supabase, leitura paginada, inserção, agrupamento por pessoa (`pessoasDe`), telefone para WhatsApp (`foneWa`), login do administrador.
 - `supabase/001_inicial.sql`: tabelas, gatilho, função de aprovação, regras de acesso, tempo real e pasta de áudios.
 - `supabase/002_fotos.sql`: tabela `fotos`, pasta `fotos` e `client_id` em todos os lançamentos de oficinas e intersetoriais.
+- `supabase/003_frentes_atividades.sql`: coluna `frentes` em `oficinas` e `intersetoriais`.
 - `guia/`: guia rápido em PDF para quem nunca usou o site (`CAIS_guia_rapido.pdf`, 6 páginas, prints com dados fictícios e setas). Para refazer depois de mudar a tela: `captura.py` tira os prints do site local com o banco simulado de `mock.js` (precisa das fontes `@fontsource/archivo`, `instrument-sans` e `ibm-plex-mono` instaladas por npm na mesma pasta) e `pdf.py` gera o PDF a partir de `guia.html`. Os caminhos dentro dos scripts apontam para `/home/claude/...` e precisam ser ajustados.
 - `.github/workflows/manter-ativo.yml`: leitura diária no banco para o projeto free não pausar.
 
@@ -70,7 +71,8 @@ Iguais às do painel antigo (conferido com os números do Apps Script em 20/11/2
 - "Seu nome (equipe)" fica num cartão próprio acima dos boxes Novo/Retorno, fora do `formAtend` (o retorno lista os atendidos de quem está registrando; o nome continua preenchido depois de cada envio).
 - No topo, dois boxes lado a lado: Novo atendido e Retorno de atendido (`#btnNovo`, `#btnRetorno`, dentro de `#pbar`). O ativo fica verde; no retorno, o box mostra o nome e o número do atendimento.
 - Modais de oficina e de encontro intersetorial têm "📷 Adicionar fotos" (várias por vez). A foto é reduzida no aparelho (lado maior 1600 px, JPEG 0,8) e vai junto na fila offline; se o aparelho ficar sem espaço, a fila guarda o registro sem as fotos. Envio em `enviarFotos` (repetir é seguro).
-- Ao marcar PROJAD/UFRJ, o bloco de frentes (RUAS, Capoeira, CnaR, PROJAD PV) surge com animação em cascata (CSS em `#fFrentes`, toca sozinha porque o bloco sai de `display:none`; desligada para quem pede menos movimento no aparelho).
+- Os modais de oficina e de encontro também mostram as frentes do PROJAD quando o polo é PROJAD/UFRJ (`#of_frentes_box`, `#in_frentes_box`, grupos `of_frentes` e `in_frentes`); gravam em `frentes` só com polo PROJAD/UFRJ.
+- Ao marcar PROJAD/UFRJ, o bloco de frentes (RUAS, Capoeira, CnaR, PROJAD PV) surge com animação em cascata (CSS na classe `.frentes-box`, usada nos três blocos de frentes, toca sozinha porque o bloco sai de `display:none`; desligada para quem pede menos movimento no aparelho).
 - Romulo pediu para tirar as frases de ajuda do Seu nome (equipe), do telefone, das substâncias, do CPF/RG, do encaminhamento, da avaliação e da gravação (consentimento). Não recolocar.
 
 ## Planilhão (aba Banco de dados)
@@ -80,7 +82,7 @@ Iguais às do painel antigo (conferido com os números do Apps Script em 20/11/2
 - Coluna Frentes: junta, sem repetir, as frentes de todos os atendimentos da pessoa (função `frentesDe`), e não só do último; o filtro conta a pessoa em cada frente.
 - Botão "Exportar para planilha" (`exportarPlanilha`): gera um .xlsx da aba aberta com duas abas, "Na tela" (linhas visíveis, com busca, filtros e ordem, nas colunas do planilhão) e "Completo" (a tabela inteira com todos os campos, menos `client_id`; nos atendimentos, um registro por atendimento). Datas saem como datas do Excel. A biblioteca SheetJS (`xlsx@0.18.5`, jsdelivr) só é baixada no clique. No celular o botão diz só "Exportar".
 - A linha de contagem, "ao vivo" e dica foi escondida a pedido do Romulo (CSS; os elementos continuam no HTML). Só aparece o aviso de filtro/ordem com o "limpar", quando houver.
-- Abas de atividades e encontros têm a coluna Fotos (contagem e botão ＋ para adicionar fotos a qualquer lançamento, `addFotosPlanilha`). Linha aberta mostra as miniaturas (link assinado, guardado em `URL_FOTO`); tocar abre a foto. Não há apagar foto pela tela (só pelo painel do Supabase, administrador).
+- Abas de atividades e encontros têm a coluna Frentes (filtrável, valores separados por ";") e a coluna Fotos (contagem e botão ＋ para adicionar fotos a qualquer lançamento, `addFotosPlanilha`). Linha aberta mostra as miniaturas (link assinado, guardado em `URL_FOTO`); tocar abre a foto. Não há apagar foto pela tela (só pelo painel do Supabase, administrador).
 - Bolinha verde ao lado do nome quando o telefone é válido: abre a conversa no WhatsApp (sem DDD, assume 21).
 - Lápis no fim da linha abre a ficha completa do último atendimento; cada atendimento aberto tem o seu lápis.
 - Edições pendentes aparecem numa caixa no topo; os botões Aprovar e Recusar só aparecem para o administrador.
@@ -106,6 +108,7 @@ A leitura direta da planilha (esquema `migracao` e extensão `http`) foi removid
 
 ## Histórico
 
+- 2026-11-23: frentes do PROJAD também nos lançamentos de atividades e encontros, com coluna Frentes filtrável nas duas planilhas. Migração `003_frentes_atividades.sql` aplicada.
 - 2026-11-23: fotos nas atividades coletivas e nos encontros intersetoriais (no lançamento e pelo ＋ do planilhão). Migração `002_fotos.sql` aplicada.
 - 2026-11-23: coluna renomeada para "Frentes"; botão Exportar para planilha; linha de contagem e dica escondida.
 - 2026-11-23: quarta frente do PROJAD, "PROJAD PV". Planilhão de atendimentos ganhou a coluna Frentes PROJAD, com filtro.
