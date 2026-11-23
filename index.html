@@ -58,6 +58,17 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
 /* subcampo condicional */
 .sub-field{margin-top:10px; padding-left:12px; border-left:3px solid var(--brand-soft)}
 .sub-field .slabel{display:block; font-weight:700; font-size:.82rem; color:var(--brand-dark); margin-bottom:6px}
+/* frentes do PROJAD: surgem em cascata quando o polo PROJAD/UFRJ é marcado */
+#fFrentes{animation:frAbre .3s ease-out backwards; transform-origin:top left}
+#fFrentes .slabel{animation:frSobe .3s ease-out .05s backwards}
+#fFrentes .chip{animation:frChip .42s cubic-bezier(.34,1.56,.64,1) backwards}
+#fFrentes .chip:nth-child(1){animation-delay:.1s}
+#fFrentes .chip:nth-child(2){animation-delay:.18s}
+#fFrentes .chip:nth-child(3){animation-delay:.26s}
+@keyframes frAbre{from{opacity:0; border-left-color:transparent; transform:translateY(-6px)} to{opacity:1; transform:none}}
+@keyframes frSobe{from{opacity:0; transform:translateY(-4px)} to{opacity:1; transform:none}}
+@keyframes frChip{0%{opacity:0; transform:translateY(8px) scale(.85)} 100%{opacity:1; transform:none}}
+@media(prefers-reduced-motion:reduce){#fFrentes, #fFrentes .slabel, #fFrentes .chip{animation:none}}
 
 /* pares sim/não lado a lado */
 .pair{display:grid; gap:14px}
@@ -251,6 +262,15 @@ table.ind td.tot{font-weight:700; color:var(--brand-dark)}
 
 /* ---------- banco de dados (planilhão) ---------- */
 main.largo{max-width:1560px}
+.db-abas{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px}
+.db-abas button{border:1.5px solid var(--line); background:#fff; border-radius:999px; padding:7px 13px; font-weight:700; font-size:.82rem; color:var(--ink); font-family:inherit}
+.db-abas button small{font-family:'IBM Plex Mono',monospace; font-size:.7rem; color:var(--muted); margin-left:2px}
+.db-abas button.on{background:var(--brand); border-color:var(--brand); color:#fff}
+.db-abas button.on small{color:#DDF0E8}
+@media(max-width:600px){ .db-abas{flex-wrap:nowrap; overflow-x:auto} .db-abas button{flex:none; padding:7px 11px; font-size:.78rem} }
+table.db td.txt{max-width:320px}
+table.db tr.aberta td.txt{white-space:normal; overflow:visible; min-width:280px; max-width:520px}
+table.db.sem-ed th:last-child{right:auto; text-align:left; padding-left:9px; padding-right:9px}
 .db-topo{display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:8px}
 .db-topo input[type=text]{flex:1; min-width:170px; padding:9px 12px}
 .db-info{display:flex; gap:12px; align-items:center; flex-wrap:wrap; font-family:'IBM Plex Mono',monospace; font-size:.72rem; font-weight:600; color:var(--muted); margin:0 2px 8px}
@@ -649,16 +669,21 @@ h3.blk{font-family:'Archivo',sans-serif; font-weight:800; font-size:1.05rem; mar
 
 <!-- ============ ABA BANCO DE DADOS ============ -->
 <main id="viewBanco" class="largo hidden">
+  <div class="db-abas" id="dbAbas">
+    <button type="button" data-t="atend" onclick="trocarAbaDb('atend')">👤 Atendimentos <small id="dbN_atend"></small></button>
+    <button type="button" data-t="ofi" onclick="trocarAbaDb('ofi')">🧩 Atividades coletivas <small id="dbN_ofi"></small></button>
+    <button type="button" data-t="inter" onclick="trocarAbaDb('inter')">🤝 Encontros intersetoriais <small id="dbN_inter"></small></button>
+  </div>
   <div class="db-topo">
     <input type="text" id="dbBusca" autocomplete="off" placeholder="Buscar por nome, bairro, documento ou telefone" oninput="renderBanco()">
     <button type="button" class="btn btn-ghost btn-sm" id="btnBanco" onclick="recarregarBanco()">↻ Atualizar</button>
     <button type="button" class="btn btn-ghost btn-sm" id="btnAdmin" onclick="openModal('mAdmin')">🔑 Administrador</button>
   </div>
-  <div class="db-info"><span id="dbCont"></span><span id="dbVivo"></span><span id="dbVista"></span><span>Toque na linha para ver os atendimentos da pessoa · toque no título da coluna para ordenar ou filtrar</span></div>
+  <div class="db-info"><span id="dbCont"></span><span id="dbVivo"></span><span id="dbVista"></span><span id="dbDica"></span></div>
   <div class="cmenu hidden" id="dbMenu"></div>
   <div class="fila-ed hidden" id="dbPend"></div>
   <div class="db-rol">
-    <table class="db">
+    <table class="db" id="dbTabela">
       <thead><tr id="dbHead"></tr></thead>
       <tbody id="dbCorpo"></tbody>
     </table>
@@ -1833,7 +1858,39 @@ const COLS = [
   { k:'encam', r:'Último encaminhamento', v:p=>p.ultimo_encaminhamento, multi:true, limpa:x=>x.replace(/\s*\(.*$/,'') },
   { k:'equipe', r:'Equipe', v:p=>p.equipe }
 ];
-const colDe = k => COLS.find(c=>c.k===k);
+// atividades coletivas (tabela oficinas) e encontros intersetoriais: uma linha por lançamento
+const MES = d=>d.slice(5,7)+'/'+d.slice(0,4);
+const COLS_OFI = [
+  { k:'data', r:'Data', v:o=>o.data, grupo:MES, rotGrupo:'mês', mostra:o=>dataBR(o.data) },
+  { k:'polo', r:'Polo', v:o=>o.polo },
+  { k:'atividade', r:'Atividade', v:o=>o.atividade },
+  { k:'participantes', r:'Presentes', v:o=>o.participantes, num:true },
+  { k:'observacoes', r:'Observações', v:o=>o.observacoes, f:'vazio', txt:true },
+  { k:'lancado', r:'Lançado em', v:o=>String(o.registro_em||'').slice(0,10), grupo:MES, rotGrupo:'mês', mostra:o=>dataBR(String(o.registro_em||'').slice(0,10)) }
+];
+const COLS_INTER = [
+  { k:'data', r:'Data', v:o=>o.data, grupo:MES, rotGrupo:'mês', mostra:o=>dataBR(o.data) },
+  { k:'polo', r:'Polo', v:o=>o.polo },
+  { k:'setores', r:'Setores', v:o=>o.setores, multi:true },
+  { k:'participantes', r:'Presentes', v:o=>o.participantes, num:true },
+  { k:'pauta', r:'Pauta / resultado', v:o=>o.pauta, f:'vazio', txt:true },
+  { k:'lancado', r:'Lançado em', v:o=>String(o.registro_em||'').slice(0,10), grupo:MES, rotGrupo:'mês', mostra:o=>dataBR(String(o.registro_em||'').slice(0,10)) }
+];
+const recenteAtiv = o => String(o.data||'') + '|' + String(o.registro_em||'');
+const ABAS_DB = {
+  atend:{ cols:COLS, chave:'cais_db_vista', linhas:()=>DADOS.pessoas, recente:p=>String(p.ultimo.registro_em),
+    busca:'Buscar por nome, bairro, documento ou telefone',
+    dica:'Toque na linha para ver os atendimentos da pessoa · toque no título da coluna para ordenar ou filtrar' },
+  ofi:{ cols:COLS_OFI, chave:'cais_db_vista_ofi', linhas:()=>DADOS.ofi, recente:recenteAtiv, nome:'atividades',
+    texto:o=>[o.atividade, o.polo, o.observacoes].join(' '), busca:'Buscar por atividade, polo ou observação',
+    dica:'Toque na linha para ler as observações inteiras · toque no título da coluna para ordenar ou filtrar' },
+  inter:{ cols:COLS_INTER, chave:'cais_db_vista_inter', linhas:()=>DADOS.inter, recente:recenteAtiv, nome:'encontros',
+    texto:o=>[o.setores, o.polo, o.pauta].join(' '), busca:'Buscar por setor, polo ou pauta',
+    dica:'Toque na linha para ler a pauta inteira · toque no título da coluna para ordenar ou filtrar' }
+};
+let DBT = 'atend';
+try{ const t = localStorage.getItem('cais_db_aba'); if(ABAS_DB[t]) DBT = t; }catch(e){}
+const colDe = k => ABAS_DB[DBT].cols.find(c=>c.k===k);
 const vazioV = x => x == null || String(x).trim() === '';
 
 // valores de filtro de uma pessoa numa coluna
@@ -1847,13 +1904,31 @@ function valoresFiltro(c, p){
 }
 
 // o que cada pessoa escolheu ver fica guardado no próprio aparelho
-let VISTA = { ord:null, filt:{} };
-try{
-  const v = JSON.parse(localStorage.getItem('cais_db_vista') || 'null');
-  if(v){ VISTA.ord = v.ord && colDe(v.ord.k) ? v.ord : null; Object.keys(v.filt||{}).forEach(k=>{ if(colDe(k)) VISTA.filt[k] = new Set(v.filt[k]); }); }
-}catch(e){}
+// (cada aba tem a sua ordem e os seus filtros)
+function lerVista(t){
+  const V = { ord:null, filt:{} }, tem = k => ABAS_DB[t].cols.some(c=>c.k===k);
+  try{
+    const v = JSON.parse(localStorage.getItem(ABAS_DB[t].chave) || 'null');
+    if(v){ V.ord = v.ord && tem(v.ord.k) ? v.ord : null; Object.keys(v.filt||{}).forEach(k=>{ if(tem(k)) V.filt[k] = new Set(v.filt[k]); }); }
+  }catch(e){}
+  return V;
+}
+const VISTAS = {};
+Object.keys(ABAS_DB).forEach(t=>VISTAS[t] = lerVista(t));
+let VISTA = VISTAS[DBT];
 function guardarVista(){
-  try{ localStorage.setItem('cais_db_vista', JSON.stringify({ ord:VISTA.ord, filt:Object.fromEntries(Object.entries(VISTA.filt).map(([k,s])=>[k,[...s]])) })); }catch(e){}
+  VISTAS[DBT] = VISTA;
+  try{ localStorage.setItem(ABAS_DB[DBT].chave, JSON.stringify({ ord:VISTA.ord, filt:Object.fromEntries(Object.entries(VISTA.filt).map(([k,s])=>[k,[...s]])) })); }catch(e){}
+}
+function trocarAbaDb(t){
+  if(!ABAS_DB[t]) return;
+  fecharMenuCol();
+  DBT = t; VISTA = VISTAS[t];
+  try{ localStorage.setItem('cais_db_aba', t); }catch(e){}
+  $('#dbBusca').value = '';
+  renderBanco();
+  $('.db-rol').scrollTo(0, 0);
+  const b = $(`#dbAbas [data-t="${t}"]`); if(b && b.scrollIntoView) b.scrollIntoView({ block:'nearest', inline:'nearest', behavior:'smooth' });
 }
 
 function comparar(c, a, b){
@@ -1870,25 +1945,26 @@ function ordenarFiltrar(lista){
     lista = lista.filter(p=>valoresFiltro(c, p).some(x=>ok.has(x)));
   });
   const o = VISTA.ord;
+  const rec = ABAS_DB[DBT].recente;
   if(o){
     const c = colDe(o.k), s = o.dir === 'desc' ? -1 : 1;
     return lista.sort((a,b)=>{
       const vazA = vazioV(c.v(a)), vazB = vazioV(c.v(b));
       if(vazA !== vazB) return vazA ? 1 : -1;
-      return s * comparar(c, a, b) || String(b.ultimo.registro_em).localeCompare(String(a.ultimo.registro_em));
+      return s * comparar(c, a, b) || rec(b).localeCompare(rec(a));
     });
   }
-  return lista.sort((a,b)=>String(b.ultimo.registro_em).localeCompare(String(a.ultimo.registro_em)));
+  return lista.sort((a,b)=>rec(b).localeCompare(rec(a)));
 }
 
 const ICO_FUNIL = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8.5V19l-4 2v-7.5z"/></svg>';
 function desenharCabecalho(){
   const o = VISTA.ord;
-  $('#dbHead').innerHTML = COLS.map(c=>{
+  $('#dbHead').innerHTML = ABAS_DB[DBT].cols.map(c=>{
     const ord = o && o.k === c.k ? (o.dir === 'asc' ? '↑' : '↓') : '';
     const fil = !!VISTA.filt[c.k];
     return `<th class="thc${fil?' f':''}${ord?' o':''}" data-col="${c.k}" title="Ordenar ou filtrar"><span class="thl">${c.r}<span class="ti">${ord || '▾'}</span>${fil ? ICO_FUNIL : ''}</span></th>`;
-  }).join('') + '<th></th>';
+  }).join('') + (DBT === 'atend' ? '<th></th>' : '');
   const partes = [];
   if(o) partes.push(`ordem: ${colDe(o.k).r} ${o.dir === 'asc' ? '↑' : '↓'}`);
   const fk = Object.keys(VISTA.filt);
@@ -1904,7 +1980,7 @@ function abrirMenuCol(k, th){
   menuCol = k;
   const c = colDe(k), m = $('#dbMenu');
   const cont = new Map();
-  DADOS.pessoas.forEach(p=>new Set(valoresFiltro(c, p)).forEach(x=>cont.set(x, (cont.get(x)||0) + 1)));
+  ABAS_DB[DBT].linhas().forEach(p=>new Set(valoresFiltro(c, p)).forEach(x=>cont.set(x, (cont.get(x)||0) + 1)));
   const vals = [...cont.keys()].sort((a,b)=>{
     if(a === VAZIO || b === VAZIO) return a === VAZIO ? 1 : -1;
     if(c.ordem){ const i = c.ordem.indexOf(a), j = c.ordem.indexOf(b); if(i >= 0 && j >= 0) return i - j; }
@@ -1955,8 +2031,42 @@ $('#dbHead').addEventListener('click', ev=>{ const th = ev.target.closest('th[da
 document.addEventListener('click', ev=>{ if(menuCol && !ev.target.closest('#dbMenu') && !ev.target.closest('#dbHead')) fecharMenuCol(); });
 document.addEventListener('keydown', ev=>{ if(ev.key === 'Escape' && menuCol) fecharMenuCol(); });
 
+const abertasAtiv = new Set();
+function cabecaBanco(){
+  const T = ABAS_DB[DBT];
+  $$('#dbAbas button').forEach(b=>b.classList.toggle('on', b.dataset.t === DBT));
+  if(DADOS.ok){ $('#dbN_atend').textContent = DADOS.pessoas.length; $('#dbN_ofi').textContent = DADOS.ofi.length; $('#dbN_inter').textContent = DADOS.inter.length; }
+  $('#dbBusca').placeholder = T.busca;
+  $('#dbDica').textContent = T.dica;
+  $('#dbTabela').classList.toggle('sem-ed', DBT !== 'atend');
+}
+
+/* atividades coletivas e encontros intersetoriais: uma linha por lançamento */
+function renderAtiv(){
+  const T = ABAS_DB[DBT], q = normaliza($('#dbBusca').value), todas = T.linhas();
+  const lista = ordenarFiltrar(todas.filter(o=>!q || normaliza(T.texto(o)).includes(q)));
+  desenharCabecalho();
+  const pres = lista.reduce((s,o)=>s + (Number(o.participantes)||0), 0);
+  $('#dbCont').textContent = DADOS.ok
+    ? `${lista.length} de ${todas.length} ${T.nome} · ${pres} presenças somadas`
+    : 'Sem leitura do banco ainda';
+  $('#dbCorpo').innerHTML = lista.map(o=>{
+    const id = DBT + o.id;
+    return `<tr class="pl${abertasAtiv.has(id)?' aberta':''}" data-at="${escapar(id)}">` + T.cols.map((c,i)=>{
+      const v = c.mostra ? c.mostra(o) : c.v(o);
+      if(i === 0) return `<td class="c-nome"><div class="nm-l"><span class="seta">▸</span><span class="nm">${v ? escapar(v) : '(sem data)'}</span></div></td>`;
+      if(c.num) return `<td>${vazioV(v) ? '<span class="nada">·</span>' : `<span class="nn">${escapar(v)}</span>`}</td>`;
+      return cel(v, c.txt ? 'txt' : '');
+    }).join('') + '</tr>';
+  }).join('') || `<tr><td colspan="${T.cols.length}" class="vazio">${DADOS.ok ? 'Nenhum lançamento encontrado com essa busca ou filtro.' : 'Sem conexão com o banco. Toque em Atualizar quando a internet voltar.'}</td></tr>`;
+  $('#dbPend').classList.add('hidden');
+  marcarAdmin();
+}
+
 function renderBanco(){
   const alvo = $('#dbCorpo'); if(!alvo) return;
+  cabecaBanco();
+  if(DBT !== 'atend'){ renderAtiv(); return; }
   const bruto = $('#dbBusca').value, q = normaliza(bruto), qd = soDigitos(bruto);
   const pend = DADOS.edicoes.filter(e=>e.estado==='pendente');
   const pendDe = {}; pend.forEach(e=>{ pendDe[e.atendimento_id] = (pendDe[e.atendimento_id]||0) + 1; });
@@ -2009,6 +2119,7 @@ $('#dbCorpo').addEventListener('click', ev=>{
   if(ev.target.closest('a')) return;               // bolinha do WhatsApp e links de áudio seguem o caminho deles
   const tr = ev.target.closest('tr.pl');
   if(!tr) return;
+  if(tr.dataset.at){ const k = tr.dataset.at; if(abertasAtiv.has(k)) abertasAtiv.delete(k); else abertasAtiv.add(k); renderBanco(); return; }
   const id = tr.dataset.p;
   if(abertas.has(id)) abertas.delete(id); else abertas.add(id);
   renderBanco();

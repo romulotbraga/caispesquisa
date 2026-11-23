@@ -2,7 +2,7 @@
 
 Documento vivo. Atualize ao fim de cada mudança, no mesmo commit. A skill `/caispesquisa` manda ler este arquivo antes de qualquer coisa.
 
-Última atualização: 2026-11-20.
+Última atualização: 2026-11-23.
 
 ## O que é
 
@@ -65,10 +65,12 @@ Iguais às do painel antigo (conferido com os números do Apps Script em 20/11/2
 - Abaixo de 600 px: título só "CAIS · Coleta de campo", opções (chips) esticam para preencher a linha, exceto a última linha; faixa etária em 5 colunas; campos e espaçamentos menores.
 - "Seu nome (equipe)" fica num cartão próprio acima dos boxes Novo/Retorno, fora do `formAtend` (o retorno lista os atendidos de quem está registrando; o nome continua preenchido depois de cada envio).
 - No topo, dois boxes lado a lado: Novo atendido e Retorno de atendido (`#btnNovo`, `#btnRetorno`, dentro de `#pbar`). O ativo fica verde; no retorno, o box mostra o nome e o número do atendimento.
+- Ao marcar PROJAD/UFRJ, o bloco de frentes (RUAS, Capoeira, CnaR) surge com animação em cascata (CSS em `#fFrentes`, toca sozinha porque o bloco sai de `display:none`; desligada para quem pede menos movimento no aparelho).
 - Romulo pediu para tirar as frases de ajuda do Seu nome (equipe), do telefone, das substâncias, do CPF/RG, do encaminhamento, da avaliação e da gravação (consentimento). Não recolocar.
 
 ## Planilhão (aba Banco de dados)
 
+- Três abas no topo (`#dbAbas`, objeto `ABAS_DB`): Atendimentos (uma linha por pessoa, descrito abaixo), Atividades coletivas (tabela `oficinas`, colunas `COLS_OFI`) e Encontros intersetoriais (tabela `intersetoriais`, colunas `COLS_INTER`). Nas duas últimas é uma linha por lançamento, com o mesmo ordenar e filtrar nos títulos; o toque na linha abre o texto inteiro de observações ou pauta; não há edição pela tela. Cada aba guarda a sua ordem e os seus filtros no aparelho (`cais_db_vista`, `cais_db_vista_ofi`, `cais_db_vista_inter`), e a última aba aberta fica em `cais_db_aba`.
 - Uma linha por pessoa, com os dados do atendimento mais recente. O toque na linha abre os atendimentos dela.
 - Bolinha verde ao lado do nome quando o telefone é válido: abre a conversa no WhatsApp (sem DDD, assume 21).
 - Lápis no fim da linha abre a ficha completa do último atendimento; cada atendimento aberto tem o seu lápis.
@@ -94,6 +96,7 @@ A leitura direta da planilha (esquema `migracao` e extensão `http`) foi removid
 
 ## Histórico
 
+- 2026-11-23: aba Banco de dados ganhou as abas Atividades coletivas e Encontros intersetoriais no mesmo formato de planilha. Frentes do PROJAD surgem com animação.
 - 2026-11-20: campo "Seu nome (equipe)" movido para antes dos boxes Novo/Retorno.
 - 2026-11-20: celular mais compacto (título curto, boxes Novo/Retorno, data sem vazar, opções preenchendo a linha, frases de ajuda retiradas; formulário cerca de 27% mais curto). Planilhão com ordenar e filtrar nos títulos. Guia refeito com as telas novas.
 - 2026-11-20: guia rápido em PDF (pasta `guia/`). No planilhão, a bolinha do WhatsApp deixou de ser cortada em nomes longos.
