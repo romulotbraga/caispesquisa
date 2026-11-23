@@ -33,7 +33,7 @@ Site de coleta de campo da pesquisa de implementação do CAIS (Rio de Janeiro),
 - `supabase/002_fotos.sql`: tabela `fotos`, pasta `fotos` e `client_id` em todos os lançamentos de oficinas e intersetoriais.
 - `supabase/003_frentes_atividades.sql`: coluna `frentes` em `oficinas` e `intersetoriais`.
 - `guia/`: guia rápido em PDF para quem nunca usou o site (`CAIS_guia_rapido.pdf`, 6 páginas, prints com dados fictícios e setas). Para refazer depois de mudar a tela: `captura.py` tira os prints do site local com o banco simulado de `mock.js` (precisa das fontes `@fontsource/archivo`, `instrument-sans` e `ibm-plex-mono` instaladas por npm na mesma pasta) e `pdf.py` gera o PDF a partir de `guia.html`. Os caminhos dentro dos scripts apontam para `/home/claude/...` e precisam ser ajustados.
-- `backup/backup_drive.gs`: backup semanal no Drive do Romulo, por Apps Script na conta Google dele. Lê as 7 tabelas pela API pública e cria uma planilha Google por semana (uma aba por tabela, tudo como texto, mais a aba resumo) na pasta "CAIS · Backups do banco". `instalar()` faz uma cópia na hora e agenda `fazerBackup` para as segundas, 6h. Guarda todas as cópias. Não copia áudios nem fotos. Se criar tabela nova, acrescentar em `TABELAS` e o Romulo cola o arquivo de novo no Apps Script.
+- `backup/backup_drive.gs`: backup semanal no Drive do Romulo, por Apps Script na conta Google dele. Lê as 7 tabelas pela API pública e cria uma planilha Google por semana (uma aba por tabela, tudo como texto, mais a aba resumo) na pasta "CAIS · Backups do banco". `instalar()` faz uma cópia na hora e agenda `fazerBackup` para as segundas, 6h. Guarda todas as cópias. Também copia os arquivos para a subpasta "arquivos" (fotos e audios), uma vez cada, com limite de 5 min por execução (o resto vai na semana seguinte). Fotos saem com a chave pública; gravações só com a chave secreta do Supabase guardada pelo Romulo nas Propriedades do script como `CHAVE_SECRETA` (nunca no código). Os 5 áudios antigos com `audio_url` já estão no Drive e não são copiados de novo. Se criar tabela nova, acrescentar em `TABELAS` e o Romulo cola o arquivo de novo no Apps Script.
 - `.github/workflows/manter-ativo.yml`: leitura diária no banco para o projeto free não pausar.
 
 ## Banco
@@ -104,12 +104,13 @@ A leitura direta da planilha (esquema `migracao` e extensão `http`) foi removid
 - [x] Romulo decidiu manter as 3 oficinas "Oficina de música" de 22/08, o encontro "Encontro" de 22/08 e os 19 encontros intersetoriais (20/11/2026).
 - [ ] Romulo: restringir o compartilhamento da planilha (está legível por qualquer pessoa com o link).
 - [ ] O envio de e-mail do mapa ainda usa um Apps Script próprio (`EMAIL_URL` em `encaminhamentos.html`), que não depende da planilha.
-- [ ] Romulo: instalar o backup semanal (colar `backup/backup_drive.gs` em script.google.com e executar `instalar`). Pedido em 23/11/2026.
+- [ ] Romulo: instalar o backup semanal (colar `backup/backup_drive.gs` em script.google.com, criar a propriedade `CHAVE_SECRETA` e executar `instalar`). Pedido em 23/11/2026.
 - [ ] Guia em PDF ainda cita só três frentes e não mostra fotos, Exportar nem as abas novas do Banco de dados (RUAS, Capoeira, CnaR); refazer quando houver outra mudança de tela.
 - [ ] Preencher os 6 atendimentos sem polo (Romulo disse que são PROJAD/UFRJ).
 
 ## Histórico
 
+- 2026-11-23: backup também copia fotos e gravações.
 - 2026-11-23: script de backup semanal no Drive (`backup/backup_drive.gs`). O plano free do Supabase não oferece backup que se possa baixar.
 - 2026-11-23: frentes do PROJAD também nos lançamentos de atividades e encontros, com coluna Frentes filtrável nas duas planilhas. Migração `003_frentes_atividades.sql` aplicada.
 - 2026-11-23: fotos nas atividades coletivas e nos encontros intersetoriais (no lançamento e pelo ＋ do planilhão). Migração `002_fotos.sql` aplicada.
