@@ -30,12 +30,15 @@ Site de coleta de campo da pesquisa de implementação do CAIS (Rio de Janeiro),
 - `encaminhamentos.html`: mapa de encaminhamentos (pontos da rede, atendidos, geração de PDF de encaminhamento). `apiGet`/`apiPost` mantêm o formato antigo do Apps Script, mas leem e gravam no Supabase.
 - `cais-db.js`: cliente do Supabase, leitura paginada, inserção, agrupamento por pessoa (`pessoasDe`), telefone para WhatsApp (`foneWa`), login do administrador.
 - `supabase/001_inicial.sql`: tabelas, gatilho, função de aprovação, regras de acesso, tempo real e pasta de áudios.
+- `supabase/002_fotos.sql`: tabela `fotos`, pasta `fotos` e `client_id` em todos os lançamentos de oficinas e intersetoriais.
 - `guia/`: guia rápido em PDF para quem nunca usou o site (`CAIS_guia_rapido.pdf`, 6 páginas, prints com dados fictícios e setas). Para refazer depois de mudar a tela: `captura.py` tira os prints do site local com o banco simulado de `mock.js` (precisa das fontes `@fontsource/archivo`, `instrument-sans` e `ibm-plex-mono` instaladas por npm na mesma pasta) e `pdf.py` gera o PDF a partir de `guia.html`. Os caminhos dentro dos scripts apontam para `/home/claude/...` e precisam ser ajustados.
 - `.github/workflows/manter-ativo.yml`: leitura diária no banco para o projeto free não pausar.
 
 ## Banco
 
-Tabelas em `public`: `atendimentos` (uma linha por atendimento, com os dados da pessoa repetidos, como era na planilha; a pessoa é o `id_pessoa`), `oficinas`, `intersetoriais`, `pontos_rede`, `encaminhamentos_doc`, `edicoes`.
+Tabelas em `public`: `atendimentos` (uma linha por atendimento, com os dados da pessoa repetidos, como era na planilha; a pessoa é o `id_pessoa`), `oficinas`, `intersetoriais`, `fotos`, `pontos_rede`, `encaminhamentos_doc`, `edicoes`.
+
+- `fotos`: uma linha por foto de atividade coletiva ou encontro intersetorial. `origem` ('oficinas' ou 'intersetoriais'), `registro` (= `client_id` do lançamento), `caminho` na pasta `fotos`, `enviado_por`. Desde 23/11/2026 todo lançamento de `oficinas` e `intersetoriais` tem `client_id` (os migrados ganharam um; a coluna tem valor padrão).
 
 - `atendimentos.n_atendimento` é preenchido por gatilho (conta os atendimentos anteriores da pessoa).
 - `client_id` (uuid, único) evita duplicar quando a fila offline reenvia.
@@ -46,9 +49,10 @@ Acesso (decisão do Romulo: aberto, como era com a planilha):
 - Qualquer pessoa com o site lê tudo e lança atendimento, oficina, encontro, ponto do mapa e encaminhamento, sem login.
 - Atendimento lançado não é alterado diretamente. A equipe propõe a mudança (tabela `edicoes`, estado `pendente`) e só o administrador aprova, pela função `decidir_edicao`, que confere o e-mail do login. O administrador edita direto.
 - Pasta `audios` é privada: qualquer um envia, só o administrador ouve (link assinado).
+- Pasta `fotos` é privada (sem link público), até 10 MB e só imagem: qualquer um envia e vê (link assinado de 1 h, como o resto do site aberto); só o administrador apaga. Tabela `fotos`: qualquer um lê e lança; só o administrador altera ou apaga.
 - Login do administrador: link por e-mail (magic link). Plano B na própria tela: colar o endereço do link.
 
-Tempo real: `atendimentos`, `oficinas`, `intersetoriais` e `edicoes` estão na publicação `supabase_realtime`. O site recarrega os dados quando algo muda, e também depois de cada envio.
+Tempo real: `atendimentos`, `oficinas`, `intersetoriais`, `fotos` e `edicoes` estão na publicação `supabase_realtime`. O site recarrega os dados quando algo muda, e também depois de cada envio.
 
 ## Regras do painel
 
@@ -65,6 +69,7 @@ Iguais às do painel antigo (conferido com os números do Apps Script em 20/11/2
 - Abaixo de 600 px: título só "CAIS · Coleta de campo", opções (chips) esticam para preencher a linha, exceto a última linha; faixa etária em 5 colunas; campos e espaçamentos menores.
 - "Seu nome (equipe)" fica num cartão próprio acima dos boxes Novo/Retorno, fora do `formAtend` (o retorno lista os atendidos de quem está registrando; o nome continua preenchido depois de cada envio).
 - No topo, dois boxes lado a lado: Novo atendido e Retorno de atendido (`#btnNovo`, `#btnRetorno`, dentro de `#pbar`). O ativo fica verde; no retorno, o box mostra o nome e o número do atendimento.
+- Modais de oficina e de encontro intersetorial têm "📷 Adicionar fotos" (várias por vez). A foto é reduzida no aparelho (lado maior 1600 px, JPEG 0,8) e vai junto na fila offline; se o aparelho ficar sem espaço, a fila guarda o registro sem as fotos. Envio em `enviarFotos` (repetir é seguro).
 - Ao marcar PROJAD/UFRJ, o bloco de frentes (RUAS, Capoeira, CnaR, PROJAD PV) surge com animação em cascata (CSS em `#fFrentes`, toca sozinha porque o bloco sai de `display:none`; desligada para quem pede menos movimento no aparelho).
 - Romulo pediu para tirar as frases de ajuda do Seu nome (equipe), do telefone, das substâncias, do CPF/RG, do encaminhamento, da avaliação e da gravação (consentimento). Não recolocar.
 
@@ -75,6 +80,7 @@ Iguais às do painel antigo (conferido com os números do Apps Script em 20/11/2
 - Coluna Frentes: junta, sem repetir, as frentes de todos os atendimentos da pessoa (função `frentesDe`), e não só do último; o filtro conta a pessoa em cada frente.
 - Botão "Exportar para planilha" (`exportarPlanilha`): gera um .xlsx da aba aberta com duas abas, "Na tela" (linhas visíveis, com busca, filtros e ordem, nas colunas do planilhão) e "Completo" (a tabela inteira com todos os campos, menos `client_id`; nos atendimentos, um registro por atendimento). Datas saem como datas do Excel. A biblioteca SheetJS (`xlsx@0.18.5`, jsdelivr) só é baixada no clique. No celular o botão diz só "Exportar".
 - A linha de contagem, "ao vivo" e dica foi escondida a pedido do Romulo (CSS; os elementos continuam no HTML). Só aparece o aviso de filtro/ordem com o "limpar", quando houver.
+- Abas de atividades e encontros têm a coluna Fotos (contagem e botão ＋ para adicionar fotos a qualquer lançamento, `addFotosPlanilha`). Linha aberta mostra as miniaturas (link assinado, guardado em `URL_FOTO`); tocar abre a foto. Não há apagar foto pela tela (só pelo painel do Supabase, administrador).
 - Bolinha verde ao lado do nome quando o telefone é válido: abre a conversa no WhatsApp (sem DDD, assume 21).
 - Lápis no fim da linha abre a ficha completa do último atendimento; cada atendimento aberto tem o seu lápis.
 - Edições pendentes aparecem numa caixa no topo; os botões Aprovar e Recusar só aparecem para o administrador.
@@ -95,11 +101,12 @@ A leitura direta da planilha (esquema `migracao` e extensão `http`) foi removid
 - [x] Romulo decidiu manter as 3 oficinas "Oficina de música" de 22/08, o encontro "Encontro" de 22/08 e os 19 encontros intersetoriais (20/11/2026).
 - [ ] Romulo: restringir o compartilhamento da planilha (está legível por qualquer pessoa com o link).
 - [ ] O envio de e-mail do mapa ainda usa um Apps Script próprio (`EMAIL_URL` em `encaminhamentos.html`), que não depende da planilha.
-- [ ] Guia em PDF ainda cita só três frentes (RUAS, Capoeira, CnaR); refazer quando houver outra mudança de tela.
+- [ ] Guia em PDF ainda cita só três frentes e não mostra fotos, Exportar nem as abas novas do Banco de dados (RUAS, Capoeira, CnaR); refazer quando houver outra mudança de tela.
 - [ ] Preencher os 6 atendimentos sem polo (Romulo disse que são PROJAD/UFRJ).
 
 ## Histórico
 
+- 2026-11-23: fotos nas atividades coletivas e nos encontros intersetoriais (no lançamento e pelo ＋ do planilhão). Migração `002_fotos.sql` aplicada.
 - 2026-11-23: coluna renomeada para "Frentes"; botão Exportar para planilha; linha de contagem e dica escondida.
 - 2026-11-23: quarta frente do PROJAD, "PROJAD PV". Planilhão de atendimentos ganhou a coluna Frentes PROJAD, com filtro.
 - 2026-11-23: aba Banco de dados ganhou as abas Atividades coletivas e Encontros intersetoriais no mesmo formato de planilha. Frentes do PROJAD surgem com animação.

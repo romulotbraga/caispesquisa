@@ -10,7 +10,7 @@
     ],
     oficinas: [{ id:1, registro_em:'2026-10-02T00:00:00Z', data:'2026-10-02', polo:'PROJAD/UFRJ', atividade:'Capoeira', participantes:12 }],
     intersetoriais: [{ id:1, registro_em:'2026-10-03T00:00:00Z', data:'2026-10-03', polo:'PROJAD/UFRJ', setores:'Saúde', participantes:5 }],
-    edicoes: [], pontos_rede: [], encaminhamentos_doc: []
+    edicoes: [], pontos_rede: [], encaminhamentos_doc: [], fotos: []
   };
   window.__T = T; window.__LOG = []; window.__sessao = null; let authCb = null; let rtCb = null;
   const seq = {}; const prox = t => (seq[t] = (seq[t] || Math.max(0, ...T[t].map(r => +r.id || 0))) + 1);
@@ -35,7 +35,7 @@
   window.supabase = { createClient: () => ({
     from: Q,
     rpc: async (f, a) => { window.__LOG.push(['rpc', f, a]); const e = T.edicoes.find(x => x.id === a.p_id); if (!window.__sessao) return { error: { message: 'Só o administrador pode aprovar edições.' } }; if (e) { e.estado = a.p_aprovar ? 'aprovada' : 'recusada'; if (a.p_aprovar) Object.assign(T.atendimentos.find(x => x.id === e.atendimento_id), e.mudancas); } return { error: null }; },
-    storage: { from: () => ({ upload: async (p) => { window.__LOG.push(['upload', p]); return { error: null }; }, createSignedUrl: async () => ({ data: { signedUrl: 'about:blank' }, error: null }) }) },
+    storage: { from: () => ({ upload: async (p) => { window.__LOG.push(['upload', p]); return { error: null }; }, createSignedUrl: async () => ({ data: { signedUrl: 'about:blank' }, error: null }), createSignedUrls: async (ps) => ({ data: ps.map(p => ({ path: p, signedUrl: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"><rect width="40" height="40" fill="#7fb"/></svg>') })), error: null }) }) },
     channel: () => { const c = { on: (_a, _b, cb) => { rtCb = cb; return c; }, subscribe: cb => { setTimeout(() => cb && cb('SUBSCRIBED'), 5); return c; } }; return c; },
     auth: { getSession: async () => ({ data: { session: window.__sessao } }), onAuthStateChange: cb => { authCb = cb; }, signInWithOtp: async () => ({ error: null }), verifyOtp: async () => ({ error: null }), signOut: async () => { window.__sessao = null; authCb && authCb('SIGNED_OUT', null); } }
   }) };

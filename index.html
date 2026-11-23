@@ -275,6 +275,17 @@ main.largo{max-width:1560px}
 @media(max-width:600px){ #btnExport .ex-l{display:none} #btnExport .ex-c{display:inline} }
 .db-info:has(#dbVista:empty){display:none}
 table.db td.txt{max-width:320px}
+.fotos-sel{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px}
+.fotos-sel:empty{display:none}
+.fs-it{position:relative; width:72px; height:72px; border-radius:10px; overflow:hidden; border:1px solid var(--line); background:#EEF3F1}
+.fs-it img{width:100%; height:100%; object-fit:cover; display:block}
+.fs-it button{position:absolute; top:3px; right:3px; width:22px; height:22px; border-radius:50%; border:none; background:rgba(16,49,44,.75); color:#fff; font-size:.7rem; line-height:22px; padding:0}
+.fs-it.carregando{display:flex; align-items:center; justify-content:center; font-size:.7rem; color:var(--muted)}
+.c-fotos{white-space:nowrap}
+.c-fotos .addf{margin-left:4px; padding:2px 7px}
+.fotos-grade{display:flex; flex-wrap:wrap; gap:8px; padding:10px 12px 14px 28px; position:sticky; left:0; max-width:min(100%, calc(100vw - 40px)); box-sizing:border-box}
+.fotos-grade a{display:block; width:112px; height:112px; border-radius:10px; overflow:hidden; border:1px solid var(--line); background:#EEF3F1}
+.fotos-grade img{width:100%; height:100%; object-fit:cover; display:block}
 table.db tr.aberta td.txt{white-space:normal; overflow:visible; min-width:280px; max-width:520px}
 table.db.sem-ed th:last-child{right:auto; text-align:left; padding-left:9px; padding-right:9px}
 .db-topo{display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:8px}
@@ -688,6 +699,7 @@ h3.blk{font-family:'Archivo',sans-serif; font-weight:800; font-size:1.05rem; mar
   </div>
   <div class="db-info"><span id="dbCont"></span><span id="dbVivo"></span><span id="dbVista"></span><span id="dbDica"></span></div>
   <div class="cmenu hidden" id="dbMenu"></div>
+  <input type="file" id="addFotoIn" accept="image/*" multiple hidden onchange="addFotosPlanilha(this)">
   <div class="fila-ed hidden" id="dbPend"></div>
   <div class="db-rol">
     <table class="db" id="dbTabela">
@@ -756,6 +768,11 @@ h3.blk{font-family:'Archivo',sans-serif; font-weight:800; font-size:1.05rem; mar
     <div class="field"><label class="flabel" for="of_nome">Nome da atividade</label><input type="text" id="of_nome" placeholder="Ex.: Oficina de música, roda de conversa…"></div>
     <div class="field"><label class="flabel" for="of_part">Nº de pessoas presentes</label><input type="text" id="of_part" inputmode="numeric" placeholder="Ex.: 12"></div>
     <div class="field"><label class="flabel" for="of_obs">Observações</label><textarea id="of_obs" placeholder="Como foi, quem conduziu, encaminhamentos…"></textarea></div>
+    <div class="field"><label class="flabel">Fotos (opcional)</label>
+      <div class="fotos-sel" id="of_fotos"></div>
+      <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('of_fotos_in').click()">📷 Adicionar fotos</button>
+      <input type="file" id="of_fotos_in" accept="image/*" multiple hidden onchange="pegarFotos(this,'of')">
+    </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal('mOficina')">Cancelar</button>
       <button class="btn btn-brand" onclick="submitOficina()">Lançar oficina</button>
@@ -780,6 +797,11 @@ h3.blk{font-family:'Archivo',sans-serif; font-weight:800; font-size:1.05rem; mar
     </div>
     <div class="field"><label class="flabel" for="in_part">Nº de pessoas presentes</label><input type="text" id="in_part" inputmode="numeric" placeholder="Ex.: 8"></div>
     <div class="field"><label class="flabel" for="in_pauta">Pauta / encaminhamentos</label><textarea id="in_pauta" placeholder="O que foi discutido e combinado…"></textarea></div>
+    <div class="field"><label class="flabel">Fotos (opcional)</label>
+      <div class="fotos-sel" id="in_fotos"></div>
+      <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('in_fotos_in').click()">📷 Adicionar fotos</button>
+      <input type="file" id="in_fotos_in" accept="image/*" multiple hidden onchange="pegarFotos(this,'in')">
+    </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal('mInter')">Cancelar</button>
       <button class="btn btn-brand" onclick="submitInter()">Lançar encontro</button>
@@ -1359,8 +1381,8 @@ function setQueue(q){
   try{ localStorage.setItem('cais_fila', JSON.stringify(q)); }
   catch(e){
     // o aparelho não tem espaço para guardar a gravação offline: salva o registro sem ela
-    q.forEach(i=>{ delete i.audioBase64; });
-    try{ localStorage.setItem('cais_fila', JSON.stringify(q)); toast('Sem espaço no aparelho para guardar a gravação offline. O registro ficou na fila sem o áudio.', 'err'); }catch(e2){}
+    q.forEach(i=>{ delete i.audioBase64; if(i.fotos) i.fotos = []; });
+    try{ localStorage.setItem('cais_fila', JSON.stringify(q)); toast('Sem espaço no aparelho para guardar gravação ou fotos offline. O registro ficou na fila sem eles.', 'err'); }catch(e2){}
   }
   renderQueue();
 }
@@ -1419,8 +1441,12 @@ async function enviar(p){
     await CAIS.inserir('atendimentos', d);
   } else if(p.tipo === 'oficina'){
     await CAIS.inserir('oficinas', Object.assign({}, p.dados, { participantes: CAIS.inteiro(p.dados.participantes) }));
+    await enviarFotos('oficinas', p.dados.client_id, p.fotos, p.quem);
   } else if(p.tipo === 'intersetorial'){
     await CAIS.inserir('intersetoriais', Object.assign({}, p.dados, { participantes: CAIS.inteiro(p.dados.participantes) }));
+    await enviarFotos('intersetoriais', p.dados.client_id, p.fotos, p.quem);
+  } else if(p.tipo === 'fotos'){
+    await enviarFotos(p.origem, p.registro, p.fotos, p.quem);
   } else throw new Error('tipo de registro desconhecido');
 }
 async function sendOrQueue(payload, okMsg){
@@ -1527,25 +1553,127 @@ function openModal(id){ $('#'+id).classList.add('show'); const d = $('#'+id+' in
 function closeModal(id){ $('#'+id).classList.remove('show'); }
 $$('.modal-bg').forEach(m=>m.addEventListener('click',e=>{ if(e.target===m) m.classList.remove('show'); }));
 
+/* =====================================================================
+   FOTOS das atividades coletivas e dos encontros intersetoriais
+   Cada foto é reduzida no aparelho (lado maior de 1600 px, JPEG) antes de
+   subir, para caber na fila offline e não pesar no plano gratuito. Fica na
+   pasta privada "fotos" e numa linha da tabela fotos, ligada ao lançamento
+   pelo client_id dele. Ver supabase/002_fotos.sql.
+===================================================================== */
+const FOTOS_SEL = { of:[], in:[] };
+let ALVO_FOTO = null;
+const fotosDe = o => (DADOS.fotos || []).filter(f=>f.registro === o.client_id);
+const nFotos = o => o.client_id ? fotosDe(o).length : 0;
+
+function lerComoDataUrl(blob){
+  return new Promise((ok, falha)=>{ const fr = new FileReader(); fr.onload = ()=>ok(fr.result); fr.onerror = ()=>falha(fr.error); fr.readAsDataURL(blob); });
+}
+async function reduzirFoto(file){
+  try{
+    const url = URL.createObjectURL(file);
+    const img = await new Promise((ok, falha)=>{ const i = new Image(); i.onload = ()=>ok(i); i.onerror = ()=>falha(new Error('formato')); i.src = url; });
+    const max = 1600, k = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+    const cv = document.createElement('canvas');
+    cv.width = Math.round(img.naturalWidth * k); cv.height = Math.round(img.naturalHeight * k);
+    cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+    URL.revokeObjectURL(url);
+    const blob = await new Promise(ok=>cv.toBlob(ok, 'image/jpeg', .8));
+    return { tipo:'image/jpeg', dataUrl: await lerComoDataUrl(blob) };
+  }catch(e){
+    // o navegador não sabe abrir (ex.: HEIC fora do iPhone): sobe o arquivo original, se couber
+    if(file.size > 10*1024*1024) throw new Error(`${file.name} é grande demais (máx. 10 MB)`);
+    return { tipo: file.type || 'image/jpeg', dataUrl: await lerComoDataUrl(file) };
+  }
+}
+async function prepararFotos(files){
+  const saida = [];
+  for(const f of files){
+    try{ const r = await reduzirFoto(f); saida.push({ client_id: CAIS.uuid(), tipo: r.tipo, dataUrl: r.dataUrl }); }
+    catch(e){ toast('Foto ignorada: ' + e.message, 'err'); }
+  }
+  return saida;
+}
+async function pegarFotos(input, k){
+  const files = [...input.files]; input.value = '';
+  if(!files.length) return;
+  const box = $('#'+k+'_fotos');
+  box.insertAdjacentHTML('beforeend', '<div class="fs-it carregando" id="'+k+'_fotos_aguarde">…</div>');
+  FOTOS_SEL[k] = FOTOS_SEL[k].concat(await prepararFotos(files));
+  renderFotosSel(k);
+}
+function renderFotosSel(k){
+  $('#'+k+'_fotos').innerHTML = FOTOS_SEL[k].map((f,i)=>`<div class="fs-it"><img src="${f.dataUrl}" alt="Foto ${i+1}"><button type="button" aria-label="Tirar foto" onclick="tirarFotoSel('${k}',${i})">✕</button></div>`).join('');
+}
+function tirarFotoSel(k, i){ FOTOS_SEL[k].splice(i, 1); renderFotosSel(k); }
+function limparFotosSel(k){ FOTOS_SEL[k] = []; renderFotosSel(k); }
+const fotosParaEnvio = k => FOTOS_SEL[k].map(f=>({ client_id:f.client_id, tipo:f.tipo, b64:f.dataUrl.split(',')[1] }));
+const extFoto = t => ({ 'image/png':'png', 'image/webp':'webp', 'image/heic':'heic', 'image/heif':'heif' })[t] || 'jpg';
+
+// sobe as fotos e registra cada uma; repetir é seguro (mesmo arquivo e mesmo client_id)
+async function enviarFotos(origem, registro, fotos, quem){
+  if(!fotos || !fotos.length) return;
+  const sb = CAIS.exigir();
+  for(const f of fotos){
+    const caminho = `${origem}/${registro}/${f.client_id}.${extFoto(f.tipo)}`;
+    const r = await sb.storage.from('fotos').upload(caminho, b64Blob(f.b64, f.tipo), { contentType: f.tipo, upsert:false });
+    if(r.error && !/exist|duplicate/i.test(r.error.message || '')) throw new Error(r.error.message);
+    await CAIS.inserir('fotos', { client_id:f.client_id, origem, registro, caminho, enviado_por: quem || null });
+  }
+}
+
+// botão ＋ na coluna Fotos do planilhão
+async function addFotosPlanilha(input){
+  const files = [...input.files]; input.value = '';
+  const alvo = ALVO_FOTO; ALVO_FOTO = null;
+  if(!files.length || !alvo || !alvo.registro) return;
+  toast('Preparando fotos…');
+  const fotos = await prepararFotos(files);
+  if(!fotos.length) return;
+  const ok = await sendOrQueue({ tipo:'fotos', origem: alvo.origem, registro: alvo.registro, quem: umEspaco($('#f_equipe').value),
+    fotos: fotos.map(f=>({ client_id:f.client_id, tipo:f.tipo, b64:f.dataUrl.split(',')[1] })) },
+    `${fotos.length} foto${fotos.length>1?'s':''} adicionada${fotos.length>1?'s':''} ✓`);
+  if(ok){ abertasAtiv.add(DBT + (alvo.origem === 'oficinas' ? DADOS.ofi : DADOS.inter).find(o=>o.client_id === alvo.registro)?.id); carregarDados(); }
+}
+
+// miniaturas da linha aberta: link assinado (1 h), guardado para não pedir de novo
+const URL_FOTO = new Map();
+async function preencherMiniaturas(){
+  const imgs = $$('.fotos-grade img[data-cam]');
+  if(!imgs.length || !CAIS.sb) return;
+  const falta = [...new Set(imgs.map(i=>i.dataset.cam))].filter(c=>{ const u = URL_FOTO.get(c); return !u || u.ate < Date.now(); });
+  if(falta.length){
+    try{
+      const { data, error } = await CAIS.sb.storage.from('fotos').createSignedUrls(falta, 3600);
+      if(error) throw new Error(error.message);
+      (data || []).forEach(d=>{ if(d.signedUrl) URL_FOTO.set(d.path, { url:d.signedUrl, ate: Date.now() + 50*60*1000 }); });
+    }catch(e){ console.warn('miniaturas', e); return; }
+  }
+  $$('.fotos-grade [data-cam]').forEach(el=>{
+    const u = URL_FOTO.get(el.dataset.cam); if(!u) return;
+    if(el.tagName === 'IMG'){ if(el.getAttribute('src') !== u.url) el.src = u.url; }
+    else el.href = u.url;
+  });
+}
+
 async function submitOficina(){
   if(!chipVal('of_polo') || !$('#of_nome').value.trim()){ toast('Informe polo e nome da atividade.','err'); return; }
-  const ok = await sendOrQueue({ tipo:'oficina', dados:{
+  const ok = await sendOrQueue({ tipo:'oficina', fotos:fotosParaEnvio('of'), quem:umEspaco($('#f_equipe').value), dados:{
     client_id:CAIS.uuid(), registro_em:new Date().toISOString(), data:$('#of_data').value, polo:chipVal('of_polo'),
     atividade:$('#of_nome').value.trim(), participantes:$('#of_part').value.trim(), observacoes:$('#of_obs').value.trim()
-  }}, 'Oficina lançada ✓');
+  }}, FOTOS_SEL.of.length ? `Oficina lançada com ${FOTOS_SEL.of.length} foto${FOTOS_SEL.of.length>1?'s':''} ✓` : 'Oficina lançada ✓');
   if(ok) carregarDados();
-  clearChips('of_polo'); ['of_nome','of_part','of_obs'].forEach(i=>$('#'+i).value='');
+  clearChips('of_polo'); ['of_nome','of_part','of_obs'].forEach(i=>$('#'+i).value=''); limparFotosSel('of');
   closeModal('mOficina');
 }
 async function submitInter(){
   if(!chipVal('in_polo')){ toast('Informe o polo.','err'); return; }
-  const ok = await sendOrQueue({ tipo:'intersetorial', dados:{
+  const ok = await sendOrQueue({ tipo:'intersetorial', fotos:fotosParaEnvio('in'), quem:umEspaco($('#f_equipe').value), dados:{
     client_id:CAIS.uuid(), registro_em:new Date().toISOString(), data:$('#in_data').value, polo:chipVal('in_polo'),
     setores:chipVal('in_setores'), participantes:$('#in_part').value.trim(),
     pauta:$('#in_pauta').value.trim()
-  }}, 'Encontro lançado ✓');
+  }}, FOTOS_SEL.in.length ? `Encontro lançado com ${FOTOS_SEL.in.length} foto${FOTOS_SEL.in.length>1?'s':''} ✓` : 'Encontro lançado ✓');
   if(ok) carregarDados();
-  clearChips('in_polo'); clearChips('in_setores'); ['in_part','in_pauta'].forEach(i=>$('#'+i).value='');
+  clearChips('in_polo'); clearChips('in_setores'); ['in_part','in_pauta'].forEach(i=>$('#'+i).value=''); limparFotosSel('in');
   closeModal('mInter');
 }
 
@@ -1732,17 +1860,19 @@ function buildPainel(dados){
    É refeita a cada envio e sempre que o banco avisa que algo mudou
    (tempo real), então as três telas andam juntas.
 ===================================================================== */
-const DADOS = { atend:[], ofi:[], inter:[], edicoes:[], pessoas:[], ok:false, em:0 };
+const DADOS = { atend:[], ofi:[], inter:[], edicoes:[], fotos:[], pessoas:[], ok:false, em:0 };
 let carregando = null;
 
 function carregarDados(){
   if(carregando) return carregando;
   carregando = (async()=>{
     try{
-      const [a,o,i,e] = await Promise.all([
+      const [a,o,i,e,f] = await Promise.all([
         CAIS.todos('atendimentos','id'), CAIS.todos('oficinas','id'),
-        CAIS.todos('intersetoriais','id'), CAIS.todos('edicoes','id')
+        CAIS.todos('intersetoriais','id'), CAIS.todos('edicoes','id'),
+        CAIS.todos('fotos','id').catch(()=>[])
       ]);
+      DADOS.fotos = f;
       a.sort((x,y)=>String(x.registro_em).localeCompare(String(y.registro_em)) || x.id - y.id);
       DADOS.atend = a; DADOS.ofi = o; DADOS.inter = i; DADOS.edicoes = e;
       DADOS.pessoas = CAIS.pessoasDe(a, CAMPOS_PESSOA);
@@ -1875,6 +2005,7 @@ const COLS_OFI = [
   { k:'polo', r:'Polo', v:o=>o.polo },
   { k:'atividade', r:'Atividade', v:o=>o.atividade },
   { k:'participantes', r:'Presentes', v:o=>o.participantes, num:true },
+  { k:'fotos', r:'Fotos', v:o=>nFotos(o), num:true, fotos:true },
   { k:'observacoes', r:'Observações', v:o=>o.observacoes, f:'vazio', txt:true },
   { k:'lancado', r:'Lançado em', v:o=>String(o.registro_em||'').slice(0,10), grupo:MES, rotGrupo:'mês', mostra:o=>dataBR(String(o.registro_em||'').slice(0,10)) }
 ];
@@ -1883,6 +2014,7 @@ const COLS_INTER = [
   { k:'polo', r:'Polo', v:o=>o.polo },
   { k:'setores', r:'Setores', v:o=>o.setores, multi:true },
   { k:'participantes', r:'Presentes', v:o=>o.participantes, num:true },
+  { k:'fotos', r:'Fotos', v:o=>nFotos(o), num:true, fotos:true },
   { k:'pauta', r:'Pauta / resultado', v:o=>o.pauta, f:'vazio', txt:true },
   { k:'lancado', r:'Lançado em', v:o=>String(o.registro_em||'').slice(0,10), grupo:MES, rotGrupo:'mês', mostra:o=>dataBR(String(o.registro_em||'').slice(0,10)) }
 ];
@@ -2136,12 +2268,15 @@ function renderAtiv(){
     return `<tr class="pl${abertasAtiv.has(id)?' aberta':''}" data-at="${escapar(id)}">` + T.cols.map((c,i)=>{
       const v = c.mostra ? c.mostra(o) : c.v(o);
       if(i === 0) return `<td class="c-nome"><div class="nm-l"><span class="seta">▸</span><span class="nm">${v ? escapar(v) : '(sem data)'}</span></div></td>`;
+      if(c.fotos) return `<td class="c-fotos">${v ? `<span class="nn">📷 ${v}</span>` : '<span class="nada">·</span>'}${o.client_id ? `<button type="button" class="ed addf" data-addfoto="${escapar(o.client_id)}" title="Adicionar fotos a este lançamento">＋</button>` : ''}</td>`;
       if(c.num) return `<td>${vazioV(v) ? '<span class="nada">·</span>' : `<span class="nn">${escapar(v)}</span>`}</td>`;
       return cel(v, c.txt ? 'txt' : '');
-    }).join('') + '</tr>';
+    }).join('') + '</tr>'
+      + (abertasAtiv.has(id) && nFotos(o) ? `<tr class="det"><td colspan="${T.cols.length}"><div class="fotos-grade">${fotosDe(o).map(f=>`<a target="_blank" rel="noopener" data-cam="${escapar(f.caminho)}" title="Abrir a foto"><img alt="Foto" data-cam="${escapar(f.caminho)}"></a>`).join('')}</div></td></tr>` : '');
   }).join('') || `<tr><td colspan="${T.cols.length}" class="vazio">${DADOS.ok ? 'Nenhum lançamento encontrado com essa busca ou filtro.' : 'Sem conexão com o banco. Toque em Atualizar quando a internet voltar.'}</td></tr>`;
   $('#dbPend').classList.add('hidden');
   marcarAdmin();
+  preencherMiniaturas();
 }
 
 function renderBanco(){
@@ -2194,6 +2329,8 @@ function renderBanco(){
 }
 
 $('#dbCorpo').addEventListener('click', ev=>{
+  const af = ev.target.closest('[data-addfoto]');
+  if(af){ ALVO_FOTO = { origem: DBT === 'ofi' ? 'oficinas' : 'intersetoriais', registro: af.dataset.addfoto }; $('#addFotoIn').click(); return; }
   const ed = ev.target.closest('[data-ed]');
   if(ed){ abrirEdicao(Number(ed.dataset.ed)); return; }
   const au = ev.target.closest('[data-audio]');
