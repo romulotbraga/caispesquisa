@@ -269,6 +269,11 @@ main.largo{max-width:1560px}
 .db-abas button.on{background:var(--brand); border-color:var(--brand); color:#fff}
 .db-abas button.on small{color:#DDF0E8}
 @media(max-width:600px){ .db-abas{flex-wrap:nowrap; overflow-x:auto} .db-abas button{flex:none; padding:7px 11px; font-size:.78rem} }
+/* linha de contagem, ao vivo e dica: escondida a pedido do Romulo; só o aviso de filtro (com "limpar") aparece quando há filtro ou ordem */
+#dbCont, #dbVivo, #dbDica{display:none}
+#btnExport .ex-c{display:none}
+@media(max-width:600px){ #btnExport .ex-l{display:none} #btnExport .ex-c{display:inline} }
+.db-info:has(#dbVista:empty){display:none}
 table.db td.txt{max-width:320px}
 table.db tr.aberta td.txt{white-space:normal; overflow:visible; min-width:280px; max-width:520px}
 table.db.sem-ed th:last-child{right:auto; text-align:left; padding-left:9px; padding-right:9px}
@@ -679,6 +684,7 @@ h3.blk{font-family:'Archivo',sans-serif; font-weight:800; font-size:1.05rem; mar
     <input type="text" id="dbBusca" autocomplete="off" placeholder="Buscar por nome, bairro, documento ou telefone" oninput="renderBanco()">
     <button type="button" class="btn btn-ghost btn-sm" id="btnBanco" onclick="recarregarBanco()">↻ Atualizar</button>
     <button type="button" class="btn btn-ghost btn-sm" id="btnAdmin" onclick="openModal('mAdmin')">🔑 Administrador</button>
+    <button type="button" class="btn btn-ghost btn-sm" id="btnExport" onclick="exportarPlanilha()"><span class="ex-l">⬇ Exportar para planilha</span><span class="ex-c">⬇ Exportar</span></button>
   </div>
   <div class="db-info"><span id="dbCont"></span><span id="dbVivo"></span><span id="dbVista"></span><span id="dbDica"></span></div>
   <div class="cmenu hidden" id="dbMenu"></div>
@@ -1849,7 +1855,7 @@ const COLS = [
   { k:'n', r:'Atend.', v:p=>p.n, num:true },
   { k:'ultima', r:'Último', v:p=>p.ultima_data, grupo:d=>d.slice(5,7)+'/'+d.slice(0,4), rotGrupo:'mês' },
   { k:'polo', r:'Polo', v:p=>p.campos.polo },
-  { k:'frentes', r:'Frentes PROJAD', v:p=>frentesDe(p), multi:true },
+  { k:'frentes', r:'Frentes', v:p=>frentesDe(p), multi:true },
   { k:'faixa_etaria', r:'Idade', v:p=>p.campos.faixa_etaria, ordem:ORDEM_IDADE },
   { k:'genero', r:'Gênero', v:p=>p.campos.genero==='Outros' && p.campos.genero_outro ? p.campos.genero_outro : p.campos.genero },
   { k:'raca_cor', r:'Raça/cor', v:p=>p.campos.raca_cor },
@@ -2036,6 +2042,76 @@ document.addEventListener('click', ev=>{ if(menuCol && !ev.target.closest('#dbMe
 document.addEventListener('keydown', ev=>{ if(ev.key === 'Escape' && menuCol) fecharMenuCol(); });
 
 const abertasAtiv = new Set();
+let VISIVEL = [];   // linhas que estão na tela agora (busca, filtros e ordem), usadas na exportação
+
+/* ---------- exportar para planilha (Excel) ----------
+   Duas abas no arquivo: "Na tela" (o que está visível, com busca, filtros
+   e ordem) e "Completo" (a tabela inteira, com todos os campos). A
+   biblioteca do Excel só é baixada quando alguém exporta. */
+const XLSX_URL = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+function carregarXlsx(){
+  if(window.XLSX) return Promise.resolve(window.XLSX);
+  return new Promise((ok, falha)=>{
+    const sc = document.createElement('script'); sc.src = XLSX_URL;
+    sc.onload = ()=> window.XLSX ? ok(window.XLSX) : falha(new Error('biblioteca não carregou'));
+    sc.onerror = ()=> falha(new Error('sem internet para baixar o gerador de planilha'));
+    document.head.appendChild(sc);
+  });
+}
+const ROT_EXTRA = { id:'ID', registro_em:'Lançado em', id_pessoa:'ID da pessoa', tipo_registro:'Tipo de registro', n_atendimento:'Nº do atendimento',
+  substancias_n:'Nº de substâncias', uso_multiplo:'Uso múltiplo', primeiro_contato:'Primeiro contato com a rede',
+  audio_nome:'Áudio (nome)', audio_url:'Áudio (link antigo)', audio_path:'Áudio (arquivo)', foto_em:'Foto em', foto_nome:'Foto (nome)', foto_url:'Foto (link)',
+  atividade:'Atividade', participantes:'Presentes', observacoes:'Observações', setores:'Setores', pauta:'Pauta / resultado' };
+const SEM_EXPORTAR = ['client_id'];
+const ehDataIso = v => typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v);
+// data vira data de verdade no Excel (ordena e filtra certo), mostrada como dd/mm/aaaa
+function celXlsx(v, k){
+  if(v == null || v === '') return null;
+  if(k === 'registro_em'){ const d = new Date(v); if(!isNaN(d)) v = new Date(d.getTime() - d.getTimezoneOffset()*6e4).toISOString().slice(0,16).replace('T',' '); return { t:'s', v:String(v) }; }
+  if(ehDataIso(v)){ const [a,m,d] = v.split('-').map(Number); return { t:'n', v:(Date.UTC(a,m-1,d) - Date.UTC(1899,11,30))/864e5, z:'dd/mm/yyyy' }; }
+  if(typeof v === 'number') return { t:'n', v };
+  return { t:'s', v:String(v) };
+}
+function folha(X, cab, linhas){
+  const ws = {}, larg = cab.map(h=>Math.min(Math.max(String(h).length, 8), 40));
+  cab.forEach((h,c)=>{ ws[X.utils.encode_cell({r:0,c})] = { t:'s', v:h }; });
+  linhas.forEach((l,r)=>l.forEach((cel,c)=>{
+    if(!cel) return;
+    ws[X.utils.encode_cell({r:r+1,c})] = cel;
+    larg[c] = Math.min(Math.max(larg[c], cel.z ? 10 : String(cel.v).length), 50);
+  }));
+  ws['!ref'] = X.utils.encode_range({ s:{r:0,c:0}, e:{ r:Math.max(linhas.length,1), c:Math.max(cab.length-1,0) } });
+  ws['!cols'] = larg.map(w=>({ wch:w + 2 }));
+  ws['!autofilter'] = { ref: ws['!ref'] };
+  return ws;
+}
+async function exportarPlanilha(){
+  if(!DADOS.ok){ toast('Ainda não há leitura do banco para exportar.', 'err'); return; }
+  const b = $('#btnExport'), txt = b.innerHTML; b.disabled = true; b.textContent = 'Gerando…';
+  try{
+    const X = await carregarXlsx(), T = ABAS_DB[DBT];
+    // aba 1: o que está na tela
+    const tela = T.cols.map(c=>c.r);
+    const linhasTela = VISIVEL.map(o=>T.cols.map(c=>{
+      const v = c.v(o);
+      return celXlsx(c.num && !vazioV(v) ? Number(v) : v, c.k === 'lancado' ? '' : c.k);
+    }));
+    // aba 2: a tabela inteira, com todos os campos
+    const base = DBT === 'atend' ? DADOS.atend : T.linhas();
+    const chaves = [];
+    const poe = k => { if(!chaves.includes(k) && !SEM_EXPORTAR.includes(k)) chaves.push(k); };
+    if(DBT === 'atend'){ ['id','registro_em','id_pessoa','n_atendimento','tipo_registro'].forEach(poe); Object.keys(ROT).forEach(poe); }
+    base.forEach(o=>Object.keys(o).forEach(poe));
+    const completo = base.slice().sort((a,b)=>String(a.data||'').localeCompare(String(b.data||'')) || a.id - b.id);
+    const wb = X.utils.book_new();
+    X.utils.book_append_sheet(wb, folha(X, tela, linhasTela), 'Na tela');
+    X.utils.book_append_sheet(wb, folha(X, chaves.map(k=>ROT[k] || ROT_EXTRA[k] || k), completo.map(o=>chaves.map(k=>celXlsx(o[k], k)))), 'Completo');
+    const nome = { atend:'atendimentos', ofi:'atividades_coletivas', inter:'encontros_intersetoriais' }[DBT];
+    X.writeFile(wb, `CAIS_${nome}_${new Date().toLocaleDateString('sv-SE')}.xlsx`);
+    toast(`Planilha gerada: ${VISIVEL.length} linha${VISIVEL.length===1?'':'s'} na tela, ${completo.length} no completo ✓`, 'ok');
+  }catch(e){ toast('Não consegui gerar a planilha: ' + e.message, 'err'); }
+  finally{ b.disabled = false; b.innerHTML = txt; }
+}
 function cabecaBanco(){
   const T = ABAS_DB[DBT];
   $$('#dbAbas button').forEach(b=>b.classList.toggle('on', b.dataset.t === DBT));
@@ -2049,6 +2125,7 @@ function cabecaBanco(){
 function renderAtiv(){
   const T = ABAS_DB[DBT], q = normaliza($('#dbBusca').value), todas = T.linhas();
   const lista = ordenarFiltrar(todas.filter(o=>!q || normaliza(T.texto(o)).includes(q)));
+  VISIVEL = lista;
   desenharCabecalho();
   const pres = lista.reduce((s,o)=>s + (Number(o.participantes)||0), 0);
   $('#dbCont').textContent = DADOS.ok
@@ -2080,6 +2157,7 @@ function renderBanco(){
     const txt = normaliza([p.nome, p.campos.bairro, p.campos.endereco, p.campos.polo, p.equipe, p.campos.moradia].join(' '));
     return txt.includes(q) || (qd.length >= 3 && (soDigitos(p.doc_numero).includes(qd) || soDigitos(p.telefone).includes(qd)));
   }));
+  VISIVEL = lista;
   desenharCabecalho();
 
   $('#dbCont').textContent = DADOS.ok

@@ -72,7 +72,9 @@ Iguais às do painel antigo (conferido com os números do Apps Script em 20/11/2
 
 - Três abas no topo (`#dbAbas`, objeto `ABAS_DB`): Atendimentos (uma linha por pessoa, descrito abaixo), Atividades coletivas (tabela `oficinas`, colunas `COLS_OFI`) e Encontros intersetoriais (tabela `intersetoriais`, colunas `COLS_INTER`). Nas duas últimas é uma linha por lançamento, com o mesmo ordenar e filtrar nos títulos; o toque na linha abre o texto inteiro de observações ou pauta; não há edição pela tela. Cada aba guarda a sua ordem e os seus filtros no aparelho (`cais_db_vista`, `cais_db_vista_ofi`, `cais_db_vista_inter`), e a última aba aberta fica em `cais_db_aba`.
 - Uma linha por pessoa, com os dados do atendimento mais recente. O toque na linha abre os atendimentos dela.
-- Coluna Frentes PROJAD: junta, sem repetir, as frentes de todos os atendimentos da pessoa (função `frentesDe`), e não só do último; o filtro conta a pessoa em cada frente.
+- Coluna Frentes: junta, sem repetir, as frentes de todos os atendimentos da pessoa (função `frentesDe`), e não só do último; o filtro conta a pessoa em cada frente.
+- Botão "Exportar para planilha" (`exportarPlanilha`): gera um .xlsx da aba aberta com duas abas, "Na tela" (linhas visíveis, com busca, filtros e ordem, nas colunas do planilhão) e "Completo" (a tabela inteira com todos os campos, menos `client_id`; nos atendimentos, um registro por atendimento). Datas saem como datas do Excel. A biblioteca SheetJS (`xlsx@0.18.5`, jsdelivr) só é baixada no clique. No celular o botão diz só "Exportar".
+- A linha de contagem, "ao vivo" e dica foi escondida a pedido do Romulo (CSS; os elementos continuam no HTML). Só aparece o aviso de filtro/ordem com o "limpar", quando houver.
 - Bolinha verde ao lado do nome quando o telefone é válido: abre a conversa no WhatsApp (sem DDD, assume 21).
 - Lápis no fim da linha abre a ficha completa do último atendimento; cada atendimento aberto tem o seu lápis.
 - Edições pendentes aparecem numa caixa no topo; os botões Aprovar e Recusar só aparecem para o administrador.
@@ -98,6 +100,7 @@ A leitura direta da planilha (esquema `migracao` e extensão `http`) foi removid
 
 ## Histórico
 
+- 2026-11-23: coluna renomeada para "Frentes"; botão Exportar para planilha; linha de contagem e dica escondida.
 - 2026-11-23: quarta frente do PROJAD, "PROJAD PV". Planilhão de atendimentos ganhou a coluna Frentes PROJAD, com filtro.
 - 2026-11-23: aba Banco de dados ganhou as abas Atividades coletivas e Encontros intersetoriais no mesmo formato de planilha. Frentes do PROJAD surgem com animação.
 - 2026-11-20: campo "Seu nome (equipe)" movido para antes dos boxes Novo/Retorno.
