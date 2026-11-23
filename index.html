@@ -65,6 +65,7 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
 #fFrentes .chip:nth-child(1){animation-delay:.1s}
 #fFrentes .chip:nth-child(2){animation-delay:.18s}
 #fFrentes .chip:nth-child(3){animation-delay:.26s}
+#fFrentes .chip:nth-child(4){animation-delay:.34s}
 @keyframes frAbre{from{opacity:0; border-left-color:transparent; transform:translateY(-6px)} to{opacity:1; transform:none}}
 @keyframes frSobe{from{opacity:0; transform:translateY(-4px)} to{opacity:1; transform:none}}
 @keyframes frChip{0%{opacity:0; transform:translateY(8px) scale(.85)} 100%{opacity:1; transform:none}}
@@ -410,7 +411,7 @@ h3.blk{font-family:'Archivo',sans-serif; font-weight:800; font-size:1.05rem; mar
           <label class="slabel">Frente de atuação do PROJAD (opcional)</label>
           <div class="chips multi" data-name="frentes" data-multi="1">
             <button type="button" class="chip">RUAS</button><button type="button" class="chip">Capoeira</button>
-            <button type="button" class="chip">CnaR</button>
+            <button type="button" class="chip">CnaR</button><button type="button" class="chip">PROJAD PV</button>
           </div>
         </div>
       </div>
@@ -1841,11 +1842,14 @@ function bolinhaWa(tel){
 const VAZIO = '(vazio)', PREENCHIDO = '(preenchido)';
 const ORDEM_IDADE = ['≤17','18–29','30–44','45–59','≥60'];
 const separa = t => String(t||'').split(';').map(x=>x.trim()).filter(Boolean);
+// frentes do PROJAD de todos os atendimentos da pessoa, sem repetir
+const frentesDe = p => [...new Set(p.atendimentos.flatMap(a=>separa(a.frentes)))].join('; ');
 const COLS = [
   { k:'nome', r:'Nome', v:p=>p.nome, f:'vazio' },
   { k:'n', r:'Atend.', v:p=>p.n, num:true },
   { k:'ultima', r:'Último', v:p=>p.ultima_data, grupo:d=>d.slice(5,7)+'/'+d.slice(0,4), rotGrupo:'mês' },
   { k:'polo', r:'Polo', v:p=>p.campos.polo },
+  { k:'frentes', r:'Frentes PROJAD', v:p=>frentesDe(p), multi:true },
   { k:'faixa_etaria', r:'Idade', v:p=>p.campos.faixa_etaria, ordem:ORDEM_IDADE },
   { k:'genero', r:'Gênero', v:p=>p.campos.genero==='Outros' && p.campos.genero_outro ? p.campos.genero_outro : p.campos.genero },
   { k:'raca_cor', r:'Raça/cor', v:p=>p.campos.raca_cor },
@@ -2088,12 +2092,12 @@ function renderBanco(){
     let h = `<tr class="pl${aberta?' aberta':''}" data-p="${escapar(p.id_pessoa)}">
       <td class="c-nome" title="${escapar(p.nome)}"><div class="nm-l"><span class="seta">▸</span><span class="nm">${escapar(p.nome || '(sem nome)')}</span>${bolinhaWa(p.telefone)}${nPend?`<span class="pend">${nPend} pendente${nPend>1?'s':''}</span>`:''}</div></td>
       <td><span class="nn">${p.n}</span></td>
-      ${cel(dataBR(p.ultima_data))}${cel(c.polo)}${cel(c.faixa_etaria)}${cel(c.genero==='Outros' && c.genero_outro ? c.genero_outro : c.genero)}${cel(c.raca_cor)}
+      ${cel(dataBR(p.ultima_data))}${cel(c.polo)}${cel(frentesDe(p))}${cel(c.faixa_etaria)}${cel(c.genero==='Outros' && c.genero_outro ? c.genero_outro : c.genero)}${cel(c.raca_cor)}
       ${cel(c.moradia)}${cel(c.bairro)}${cel(c.substancias)}${cel(c.documentacao)}${cel(p.doc_numero)}${cel(p.telefone)}
       ${cel(p.ultimo_encaminhamento)}${cel(p.equipe)}
       <td class="c-ed"><button type="button" class="ed" data-ed="${u.id}" title="Ver a ficha completa e editar o último atendimento">✎</button></td></tr>`;
     if(aberta){
-      h += `<tr class="det"><td colspan="16"><div class="det-in"><table class="sub">
+      h += `<tr class="det"><td colspan="17"><div class="det-in"><table class="sub">
         <thead><tr><th></th><th>Nº</th><th>Data</th><th>Tipo</th><th>Polo</th><th>Equipe</th><th>Demanda</th><th>Descrição</th><th>Encaminhamento</th><th>Anterior se efetivou?</th><th>Aval.</th><th>Áudio</th></tr></thead><tbody>`
         + p.atendimentos.slice().reverse().map(a=>{
           const audio = a.audio_url ? `<a href="${escapar(a.audio_url)}" target="_blank" rel="noopener" title="Abrir a gravação">🎧</a>`
@@ -2105,7 +2109,7 @@ function renderBanco(){
         }).join('') + `</tbody></table></div></td></tr>`;
     }
     return h;
-  }).join('') || `<tr><td colspan="16" class="vazio">${DADOS.ok ? 'Ninguém encontrado com essa busca.' : 'Sem conexão com o banco. Toque em Atualizar quando a internet voltar.'}</td></tr>`;
+  }).join('') || `<tr><td colspan="17" class="vazio">${DADOS.ok ? 'Ninguém encontrado com essa busca.' : 'Sem conexão com o banco. Toque em Atualizar quando a internet voltar.'}</td></tr>`;
 
   renderPendentes(pend);
   marcarAdmin();

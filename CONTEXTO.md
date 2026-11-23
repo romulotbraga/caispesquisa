@@ -39,7 +39,7 @@ Tabelas em `public`: `atendimentos` (uma linha por atendimento, com os dados da 
 
 - `atendimentos.n_atendimento` é preenchido por gatilho (conta os atendimentos anteriores da pessoa).
 - `client_id` (uuid, único) evita duplicar quando a fila offline reenvia.
-- `frentes`: frentes do PROJAD marcadas no atendimento ("RUAS; Capoeira; CnaR").
+- `frentes`: frentes do PROJAD marcadas no atendimento (opções: RUAS, Capoeira, CnaR, PROJAD PV; gravadas como "RUAS; Capoeira").
 - `audio_url`: link do Drive das 5 gravações antigas. `audio_path`: caminho na pasta `audios` do Supabase para as novas.
 
 Acesso (decisão do Romulo: aberto, como era com a planilha):
@@ -65,17 +65,18 @@ Iguais às do painel antigo (conferido com os números do Apps Script em 20/11/2
 - Abaixo de 600 px: título só "CAIS · Coleta de campo", opções (chips) esticam para preencher a linha, exceto a última linha; faixa etária em 5 colunas; campos e espaçamentos menores.
 - "Seu nome (equipe)" fica num cartão próprio acima dos boxes Novo/Retorno, fora do `formAtend` (o retorno lista os atendidos de quem está registrando; o nome continua preenchido depois de cada envio).
 - No topo, dois boxes lado a lado: Novo atendido e Retorno de atendido (`#btnNovo`, `#btnRetorno`, dentro de `#pbar`). O ativo fica verde; no retorno, o box mostra o nome e o número do atendimento.
-- Ao marcar PROJAD/UFRJ, o bloco de frentes (RUAS, Capoeira, CnaR) surge com animação em cascata (CSS em `#fFrentes`, toca sozinha porque o bloco sai de `display:none`; desligada para quem pede menos movimento no aparelho).
+- Ao marcar PROJAD/UFRJ, o bloco de frentes (RUAS, Capoeira, CnaR, PROJAD PV) surge com animação em cascata (CSS em `#fFrentes`, toca sozinha porque o bloco sai de `display:none`; desligada para quem pede menos movimento no aparelho).
 - Romulo pediu para tirar as frases de ajuda do Seu nome (equipe), do telefone, das substâncias, do CPF/RG, do encaminhamento, da avaliação e da gravação (consentimento). Não recolocar.
 
 ## Planilhão (aba Banco de dados)
 
 - Três abas no topo (`#dbAbas`, objeto `ABAS_DB`): Atendimentos (uma linha por pessoa, descrito abaixo), Atividades coletivas (tabela `oficinas`, colunas `COLS_OFI`) e Encontros intersetoriais (tabela `intersetoriais`, colunas `COLS_INTER`). Nas duas últimas é uma linha por lançamento, com o mesmo ordenar e filtrar nos títulos; o toque na linha abre o texto inteiro de observações ou pauta; não há edição pela tela. Cada aba guarda a sua ordem e os seus filtros no aparelho (`cais_db_vista`, `cais_db_vista_ofi`, `cais_db_vista_inter`), e a última aba aberta fica em `cais_db_aba`.
 - Uma linha por pessoa, com os dados do atendimento mais recente. O toque na linha abre os atendimentos dela.
+- Coluna Frentes PROJAD: junta, sem repetir, as frentes de todos os atendimentos da pessoa (função `frentesDe`), e não só do último; o filtro conta a pessoa em cada frente.
 - Bolinha verde ao lado do nome quando o telefone é válido: abre a conversa no WhatsApp (sem DDD, assume 21).
 - Lápis no fim da linha abre a ficha completa do último atendimento; cada atendimento aberto tem o seu lápis.
 - Edições pendentes aparecem numa caixa no topo; os botões Aprovar e Recusar só aparecem para o administrador.
-- Títulos das colunas clicáveis: ordenar (crescente/decrescente) e filtrar por valores, como numa planilha. As colunas ficam na lista `COLS` (de onde vem o valor, ordem especial da idade, filtro por mês na data, filtro só preenchido/vazio em nome, documento e telefone, valores separados por ";" em substâncias e encaminhamento). A escolha de cada pessoa fica guardada no próprio aparelho (`cais_db_vista`); "limpar" desfaz.
+- Títulos das colunas clicáveis: ordenar (crescente/decrescente) e filtrar por valores, como numa planilha. As colunas ficam na lista `COLS` (de onde vem o valor, ordem especial da idade, filtro por mês na data, filtro só preenchido/vazio em nome, documento e telefone, valores separados por ";" em substâncias, encaminhamento e frentes). A escolha de cada pessoa fica guardada no próprio aparelho (`cais_db_vista`); "limpar" desfaz.
 
 ## Migração da planilha (20/11/2026)
 
@@ -92,10 +93,12 @@ A leitura direta da planilha (esquema `migracao` e extensão `http`) foi removid
 - [x] Romulo decidiu manter as 3 oficinas "Oficina de música" de 22/08, o encontro "Encontro" de 22/08 e os 19 encontros intersetoriais (20/11/2026).
 - [ ] Romulo: restringir o compartilhamento da planilha (está legível por qualquer pessoa com o link).
 - [ ] O envio de e-mail do mapa ainda usa um Apps Script próprio (`EMAIL_URL` em `encaminhamentos.html`), que não depende da planilha.
+- [ ] Guia em PDF ainda cita só três frentes (RUAS, Capoeira, CnaR); refazer quando houver outra mudança de tela.
 - [ ] Preencher os 6 atendimentos sem polo (Romulo disse que são PROJAD/UFRJ).
 
 ## Histórico
 
+- 2026-11-23: quarta frente do PROJAD, "PROJAD PV". Planilhão de atendimentos ganhou a coluna Frentes PROJAD, com filtro.
 - 2026-11-23: aba Banco de dados ganhou as abas Atividades coletivas e Encontros intersetoriais no mesmo formato de planilha. Frentes do PROJAD surgem com animação.
 - 2026-11-20: campo "Seu nome (equipe)" movido para antes dos boxes Novo/Retorno.
 - 2026-11-20: celular mais compacto (título curto, boxes Novo/Retorno, data sem vazar, opções preenchendo a linha, frases de ajuda retiradas; formulário cerca de 27% mais curto). Planilhão com ordenar e filtrar nos títulos. Guia refeito com as telas novas.
