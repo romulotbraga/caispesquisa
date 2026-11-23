@@ -32,8 +32,9 @@ Site de coleta de campo da pesquisa de implementação do CAIS (Rio de Janeiro),
 - `supabase/001_inicial.sql`: tabelas, gatilho, função de aprovação, regras de acesso, tempo real e pasta de áudios.
 - `supabase/002_fotos.sql`: tabela `fotos`, pasta `fotos` e `client_id` em todos os lançamentos de oficinas e intersetoriais.
 - `supabase/003_frentes_atividades.sql`: coluna `frentes` em `oficinas` e `intersetoriais`.
+- `supabase/004_uso_armazenamento.sql`: função `uso_armazenamento()` (só totais em bytes de arquivos por pasta e do banco; liberada para a chave pública).
 - `guia/`: guia rápido em PDF para quem nunca usou o site (`CAIS_guia_rapido.pdf`, 6 páginas, prints com dados fictícios e setas). Para refazer depois de mudar a tela: `captura.py` tira os prints do site local com o banco simulado de `mock.js` (precisa das fontes `@fontsource/archivo`, `instrument-sans` e `ibm-plex-mono` instaladas por npm na mesma pasta) e `pdf.py` gera o PDF a partir de `guia.html`. Os caminhos dentro dos scripts apontam para `/home/claude/...` e precisam ser ajustados.
-- `backup/backup_drive.gs`: backup semanal no Drive do Romulo, por Apps Script na conta Google dele. Lê as 7 tabelas pela API pública e cria uma planilha Google por semana (uma aba por tabela, tudo como texto, mais a aba resumo) na pasta "CAIS · Backups do banco". `instalar()` faz uma cópia na hora e agenda `fazerBackup` para as segundas, 6h. Guarda todas as cópias. Também copia os arquivos para a subpasta "arquivos" (fotos e audios), uma vez cada, com limite de 5 min por execução (o resto vai na semana seguinte). Fotos saem com a chave pública; gravações só com a chave secreta do Supabase guardada pelo Romulo nas Propriedades do script como `CHAVE_SECRETA` (nunca no código). Os 5 áudios antigos com `audio_url` já estão no Drive e não são copiados de novo. Se criar tabela nova, acrescentar em `TABELAS` e o Romulo cola o arquivo de novo no Apps Script.
+- `backup/backup_drive.gs`: backup semanal no Drive do Romulo, por Apps Script na conta Google dele. Lê as 7 tabelas pela API pública e cria uma planilha Google por semana (uma aba por tabela, tudo como texto, mais a aba resumo) na pasta "CAIS · Backups do banco". `instalar()` faz uma cópia na hora e agenda `fazerBackup` para as segundas, 6h. Guarda todas as cópias. Também copia os arquivos para a subpasta "arquivos" (fotos e audios), uma vez cada, com limite de 5 min por execução (o resto vai na semana seguinte). Fotos saem com a chave pública; gravações só com a chave secreta do Supabase guardada pelo Romulo nas Propriedades do script como `CHAVE_SECRETA` (nunca no código). Os 5 áudios antigos com `audio_url` já estão no Drive e não são copiados de novo. A cada backup manda um e-mail (MailApp, para a conta dona do script) com o % ocupado da cota de 1 GB de arquivos, por pasta, e dos 500 MB do banco; aviso a partir de 70% e alerta a partir de 85%. Se criar tabela nova, acrescentar em `TABELAS` e o Romulo cola o arquivo de novo no Apps Script.
 - `.github/workflows/manter-ativo.yml`: leitura diária no banco para o projeto free não pausar.
 
 ## Banco
@@ -110,6 +111,7 @@ A leitura direta da planilha (esquema `migracao` e extensão `http`) foi removid
 
 ## Histórico
 
+- 2026-11-23: e-mail semanal com o espaço ocupado (função `uso_armazenamento`, migração 004).
 - 2026-11-23: backup também copia fotos e gravações.
 - 2026-11-23: script de backup semanal no Drive (`backup/backup_drive.gs`). O plano free do Supabase não oferece backup que se possa baixar.
 - 2026-11-23: frentes do PROJAD também nos lançamentos de atividades e encontros, com coluna Frentes filtrável nas duas planilhas. Migração `003_frentes_atividades.sql` aplicada.

@@ -18,11 +18,17 @@
    Sem ela, o backup avisa no resumo e copia só as fotos.
    A chave secreta passa por cima de todas as regras do banco: fica só
    nas propriedades do script, nunca no código nem no repositório.
+
+   E-mail: a cada backup chega um e-mail para a conta dona do script com
+   o % ocupado da cota de arquivos (1 GB do plano free) e do banco
+   (500 MB), lido pela função uso_armazenamento (supabase/004).
 ===================================================================== */
 const URL_BANCO = 'https://odlexesnjlglpvrhhujd.supabase.co';
 const CHAVE = 'sb_publishable_nAbw9pHMK8QJYuKCowivgQ_IHUE9MdM';
 const PASTA = 'CAIS · Backups do banco';
 const LIMITE_MS = 5 * 60 * 1000;   // o Apps Script para em 6 min; o que faltar vai na próxima semana
+const COTA_ARQUIVOS = 1024 * 1024 * 1024;   // 1 GB do plano free
+const COTA_BANCO = 500 * 1024 * 1024;       // 500 MB do plano free
 const TABELAS = ['atendimentos', 'oficinas', 'intersetoriais', 'fotos', 'edicoes', 'encaminhamentos_doc', 'pontos_rede'];
 
 function instalar() {
@@ -32,7 +38,7 @@ function instalar() {
   ScriptApp.newTrigger('fazerBackup').timeBased()
     .onWeekDay(ScriptApp.WeekDay.MONDAY).atHour(6).inTimezone('America/Sao_Paulo').create();
   const url = fazerBackup();
-  Logger.log('Backup semanal agendado (segundas, 6h). Primeira cópia: ' + url);
+  Logger.log('Backup semanal agendado (segundas, 6h). Primeira cópia: ' + url + '. O e-mail com o espaço ocupado foi enviado.');
 }
 
 function lerTabela(tabela) {
@@ -117,5 +123,54 @@ function fazerBackup() {
   ab.getRange(1, 1, 1, 2).setFontWeight('bold');
   ab.getRange(resumo.length + 2, 1).setValue('Gerado em ' + hoje + ' (horário de Brasília)');
   DriveApp.getFileById(ss.getId()).moveTo(pasta());
+  try { enviarUso(ss.getUrl(), resumo); } catch (e) { Logger.log('e-mail de uso falhou: ' + e); }
   return ss.getUrl();
+}
+
+const mb = b => (b / 1024 / 1024).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + ' MB';
+const pct = (b, cota) => (100 * b / cota).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + '%';
+
+function lerUso() {
+  const r = UrlFetchApp.fetch(`${URL_BANCO}/rest/v1/rpc/uso_armazenamento`, {
+    method: 'post', contentType: 'application/json', payload: '{}',
+    headers: { apikey: CHAVE, Authorization: 'Bearer ' + CHAVE }, muteHttpExceptions: true
+  });
+  if (r.getResponseCode() !== 200) throw new Error('uso_armazenamento: ' + r.getResponseCode() + ' ' + r.getContentText().slice(0, 200));
+  return JSON.parse(r.getContentText());
+}
+
+function barra(b, cota) {
+  const p = Math.min(100, 100 * b / cota), cor = p >= 85 ? '#C0392B' : p >= 70 ? '#D99A1B' : '#0B7A63';
+  return `<div style="background:#E6EEEA;border-radius:6px;height:12px;width:320px;overflow:hidden"><div style="background:${cor};height:12px;width:${Math.max(p, 0.5)}%"></div></div>`;
+}
+
+// e-mail semanal: quanto da cota de 1 GB de arquivos está ocupado
+function enviarUso(urlBackup, resumo) {
+  const u = lerUso();
+  const arq = Number(u.arquivos_bytes) || 0, banco = Number(u.banco_bytes) || 0;
+  const pp = u.por_pasta || {};
+  const nomes = { audios: 'Gravações', fotos: 'Fotos' };
+  const p = 100 * arq / COTA_ARQUIVOS;
+  const alerta = p >= 85 ? 'Atenção: quase cheio. Hora de apagar do Supabase as gravações antigas que já estão no Drive.'
+    : p >= 70 ? 'Aviso: passou de 70%. Vale planejar a limpeza das gravações antigas que já estão no Drive.' : '';
+  const linhasPasta = Object.keys(pp).sort().map(k => `<tr><td style="padding:2px 12px 2px 0">${nomes[k] || k}</td><td>${mb(Number(pp[k]))}</td></tr>`).join('')
+    || '<tr><td>Nenhum arquivo ainda</td></tr>';
+  const html = `<div style="font-family:Arial,sans-serif;font-size:14px;color:#10312C">
+    <h2 style="margin:0 0 4px">CAIS Pesquisa · espaço ocupado</h2>
+    <p style="margin:0 0 14px;color:#5B6F69">Plano gratuito do Supabase</p>
+    ${alerta ? `<p style="background:#FFF4DC;border:1px solid #EED9AC;border-radius:8px;padding:8px 10px"><b>${alerta}</b></p>` : ''}
+    <p style="margin:0 0 4px"><b>Arquivos: ${pct(arq, COTA_ARQUIVOS)} de 1 GB</b> (${mb(arq)}, ${u.n_arquivos} arquivo${u.n_arquivos == 1 ? '' : 's'})</p>
+    ${barra(arq, COTA_ARQUIVOS)}
+    <table style="margin:8px 0 16px;font-size:13px">${linhasPasta}</table>
+    <p style="margin:0 0 4px"><b>Banco de dados: ${pct(banco, COTA_BANCO)} de 500 MB</b> (${mb(banco)})</p>
+    ${barra(banco, COTA_BANCO)}
+    <p style="margin:18px 0 6px"><b>Backup desta semana</b></p>
+    <table style="font-size:13px">${resumo.slice(1).map(l => `<tr><td style="padding:2px 12px 2px 0">${l[0]}</td><td>${l[1]}</td></tr>`).join('')}</table>
+    <p><a href="${urlBackup}">Abrir a cópia no Drive</a></p>
+  </div>`;
+  MailApp.sendEmail({
+    to: Session.getEffectiveUser().getEmail(),
+    subject: `CAIS · arquivos ocupando ${pct(arq, COTA_ARQUIVOS)} de 1 GB` + (alerta ? ' · atenção' : ''),
+    htmlBody: html
+  });
 }
